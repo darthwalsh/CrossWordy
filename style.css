@@ -1,0 +1,49 @@
+:root {
+  --grid-width: 3;
+}
+
+body {
+  margin: 0;
+}
+
+h1 {
+  text-align: center;
+  margin: 0;
+  font-size: 8vw
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+td {
+  border: 1px solid black;
+  position: relative;
+}
+td:after {
+  content: "";
+  display: block;
+  margin-top: 100%;
+  background-color: beige;
+}
+
+td > span {
+  position: absolute;
+  font-size: calc(30vw / var(--grid-width));
+}
+
+td > div {
+  position: absolute;
+  width: 100%;
+  margin-top: calc(15vw / var(--grid-width));
+  text-align: center;
+  font-size: calc(80vw / var(--grid-width));
+}
+
+.dark {
+  background-color: gray;
+}
+
+/* document.documentElement.style.setProperty("--grid-width", "5"); */
