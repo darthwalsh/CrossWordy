@@ -24,8 +24,31 @@ const dataDarks = `
 ...@.
 ...@.
 .....
-@@.@.`.trim().split('\n')
+@@...`.trim().split('\n')
   .map(row => row.split('').map(c => c == '@'));
+
+const table = $('grid');
+
+/**
+ * 
+ * @param {number} x 
+ * @param {number} y 
+ * @returns {HTMLElement}
+ */
+function getTD(x, y) {
+  return document.querySelectorAll(`tbody tr:nth-child(${y + 1}) td:nth-child(${x + 1})`)[0];
+}
+
+let focus;
+function updateFocus(x, y) {
+  if (focus) {
+    getTD(...focus).style.background = '';
+  }
+  focus = [x, y];
+  getTD(...focus).style.background = 'yellow';
+
+  //TODO update the whole row/column with pale blue
+}
 
 /**
  * 
@@ -47,7 +70,6 @@ function reload(darks) {
   const cols = darks[0].map((_, x) => darks.map(row => row[x]));
   let i = 0;
 
-  const table = $('grid');
   table.removeChild(table.firstElementChild);
   const tbody = create(table, 'tbody')
   for (const [y, row] of darks.entries()) {
@@ -61,6 +83,9 @@ function reload(darks) {
 
       if (isNum(x, darks[y]) || isNum(y, cols[x])) {
         const span = create(td, 'span');
+        if (!i) {
+          updateFocus(x, y);
+        }
         span.innerText = ++i;
       }
     }
@@ -69,5 +94,22 @@ function reload(darks) {
   document.documentElement.style.setProperty("--grid-width", darks[0].length);
 }  
 
-
 reload(dataDarks);
+
+let vertical = false;
+
+/**
+ * 
+ * @param {MouseEvent} e 
+ */
+function onClick(e) {
+  const target = /** @type {HTMLElement} **/ (e.target);
+  const td = target.closest('td');
+  if (!td) return;
+
+  const x = td.cellIndex, y = td.parentElement.rowIndex;
+  if (dataDarks[y][x]) return;
+
+  updateFocus(x, y);
+}
+table.onclick = onClick;

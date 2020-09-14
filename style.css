@@ -45,5 +45,3 @@ td > div {
 .dark {
   background-color: gray;
 }
-
-/* document.documentElement.style.setProperty("--grid-width", "5"); */
