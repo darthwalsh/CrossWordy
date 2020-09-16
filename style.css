@@ -3,6 +3,7 @@
 }
 
 body {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   margin: 0;
 }
 
@@ -15,7 +16,6 @@ h1 {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
 td {
@@ -44,4 +44,13 @@ td > div {
 
 .dark {
   background-color: gray;
+}
+
+#hint {
+  width: 100%;
+  text-align: center;
+  background-color: #A4ABFF;
+  height: calc(100vw / var(--grid-width));
+  font-size: calc(80vw / var(--grid-width));
+  margin-top: 2vw;
 }
