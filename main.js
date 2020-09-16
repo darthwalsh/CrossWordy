@@ -149,12 +149,14 @@ table.onclick = onClick;
 
 /**
  * 
- * @param {KeyboardEvent} e 
+ * @param {InputEvent} e 
  */
-function onPress(e) {
-  const target = /** @type {HTMLElement} **/ (e.target);
-  const td = target.closest('td');
-  if (!td) return;
+function onInput(e) {
+  const input = /** @type {HTMLInputElement} **/ (e.target);
+  if (input.value.length > 1) {
+    input.value = input.value.slice(-1);
+  }
+  const td = input.closest('td');
 
   let x = td.cellIndex, y = td.parentElement.rowIndex;
   const [dx, dy] = getDXY();
@@ -168,7 +170,7 @@ function onPress(e) {
     updateFocus(x, y, vertical);
   }
 }
-table.onkeyup = onPress;
+table.oninput = onInput;
 
 $('hint').onclick = () => {
   updateFocus(...focus, !vertical);
