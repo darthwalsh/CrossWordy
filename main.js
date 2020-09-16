@@ -20,7 +20,7 @@ function create(parent, name, attributes = {}) {
 
 let vertical;
 
-//TODO load from database
+//(database) load data from database
 const dataDarks = `
 ...@@
 ...@.
@@ -41,14 +41,20 @@ function getTD(x, y) {
   return document.querySelectorAll(`tbody tr:nth-child(${y + 1}) td:nth-child(${x + 1})`)[0];
 }
 
+function inBounds(x, y) {
+  return dataDarks[y] && x in dataDarks[y];
+}
+
 function writable(x, y) {
-  return dataDarks[y] && x in dataDarks[y] && !dataDarks[y][x];
+  return inBounds(x, y) && !dataDarks[y][x];
+}
+
+function getDXY() {
+  return vertical ? [0, 1] : [1, 0];
 }
 
 function* getRowCol(x, y) {
-  let dx = 0, dy = 0;
-  if (vertical) dy = 1;
-  else dx = 1;
+  const [dx, dy] = getDXY();
 
   for (; writable(x - dx, y - dy); x -= dx, y -= dy) { }
   for (; writable(x, y); x += dx, y += dy)
@@ -63,7 +69,10 @@ function updateFocus(x, y, newVertical) {
   focus = [x, y];
   vertical = newVertical;
   [...getRowCol(...focus)].forEach(xy => getTD(...xy).style.background = '#A4ABFF');
-  getTD(...focus).style.background = 'yellow';
+
+  const td = getTD(...focus);
+  td.style.background = 'yellow';
+  td.firstElementChild.select();
 }
 
 /**
@@ -95,7 +104,7 @@ function reload(darks) {
       if (b) {
         td.classList.add('dark');
       }
-      create(td, 'div');
+      create(td, 'input');
 
       if (isNum(x, darks[y]) || isNum(y, cols[x])) {
         const span = create(td, 'span');
@@ -110,6 +119,15 @@ function reload(darks) {
   document.documentElement.style.setProperty("--grid-width", darks[0].length);
   updateFocus(...f, false);
 }  
+
+/**
+ * @returns string
+ */
+function cellValue(x, y) {
+  //TODO(database) the source of truth should be the database, not the DOM
+  const input = getTD(x, y).firstElementChild;
+  return input.value;
+}
 
 reload(dataDarks);
 
@@ -128,6 +146,29 @@ function onClick(e) {
   updateFocus(x, y, vertical);
 }
 table.onclick = onClick;
+
+/**
+ * 
+ * @param {KeyboardEvent} e 
+ */
+function onPress(e) {
+  const target = /** @type {HTMLElement} **/ (e.target);
+  const td = target.closest('td');
+  if (!td) return;
+
+  let x = td.cellIndex, y = td.parentElement.rowIndex;
+  const [dx, dy] = getDXY();
+
+  while (inBounds(x, y) && cellValue(x, y)) {
+    x += dx;
+    y += dy;
+  }
+
+  if (writable(x, y)) {
+    updateFocus(x, y, vertical);
+  }
+}
+table.onkeyup = onPress;
 
 $('hint').onclick = () => {
   updateFocus(...focus, !vertical);
