@@ -1,5 +1,12 @@
 "use strict";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyD5dGDgA23L_4tlJqZeuWEMuKoq4IBe0yE",
+  projectId: "last-walk",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 function $(id) {
   return document.getElementById(id);
 }
@@ -17,19 +24,6 @@ function create(parent, name, attributes = {}) {
   }
   return node;
 }
-
-let vertical;
-
-//(database) load data from database
-const dataDarks = `
-...@@
-...@.
-...@.
-.....
-@@...`.trim().split('\n')
-  .map(row => row.split('').map(c => c == '@'));
-
-const table = $('grid');
 
 /**
  * 
@@ -101,10 +95,11 @@ function reload(darks) {
     const tr = create(tbody, 'tr');
     for (const [x, b] of row.entries()) {
       const td = create(tr, 'td');
+      const input = create(td, 'input');
       if (b) {
         td.classList.add('dark');
+        input.style.display = 'none';
       }
-      create(td, 'input');
 
       if (isNum(x, darks[y]) || isNum(y, cols[x])) {
         const span = create(td, 'span');
@@ -124,12 +119,10 @@ function reload(darks) {
  * @returns string
  */
 function cellValue(x, y) {
-  //TODO(database) the source of truth should be the database, not the DOM
+  if (dataDarks[y][x]) return null;
   const input = getTD(x, y).firstElementChild;
   return input.value;
 }
-
-reload(dataDarks);
 
 /**
  * 
@@ -145,7 +138,6 @@ function onClick(e) {
 
   updateFocus(x, y, vertical);
 }
-table.onclick = onClick;
 
 /**
  * 
@@ -159,6 +151,9 @@ function onInput(e) {
   const td = input.closest('td');
 
   let x = td.cellIndex, y = td.parentElement.rowIndex;
+
+  doc.update({[`${x}_${y}`]: input.value})
+
   const [dx, dy] = getDXY();
 
   while (inBounds(x, y) && cellValue(x, y)) {
@@ -170,8 +165,42 @@ function onInput(e) {
     updateFocus(x, y, vertical);
   }
 }
-table.oninput = onInput;
 
-$('hint').onclick = () => {
-  updateFocus(...focus, !vertical);
+let vertical;
+let dataDarks;
+const table = $('grid');
+
+const urlParams = new URLSearchParams(window.location.search);
+const databaseId = urlParams.get('id');
+if (!databaseId) { alert('TODO puzzle creation'); } //TODO
+const doc = db.collection("puzzles").doc(databaseId);
+
+function updateChars(doc) {
+  if (doc.metadata.hasPendingWrites) return;
+  
+  const data = doc.data();
+  for (const key in data) {
+    if (!/\d+_\d+/.test(key)) continue;
+    const [x, y] = key.split('_').map(Number);
+    getTD(x, y).firstElementChild.value = data[key];
+  }
 }
+
+async function load() {
+  const darksReq = await doc.get();
+  const {darks} = darksReq.data();
+  dataDarks = darks.trim().split('_')
+    .map(row => row.split('').map(c => c == '@'));
+
+  reload(dataDarks);
+
+  doc.onSnapshot(updateChars)
+
+  table.onclick = onClick;
+  table.oninput = onInput;
+
+  $('hint').onclick = () => {
+    updateFocus(...focus, !vertical);
+  }
+}
+load()
