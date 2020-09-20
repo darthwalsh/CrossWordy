@@ -295,5 +295,4 @@ if (databaseId) {
   createPuzzle();
 }
 
-// TODO Add to github pages, cloudflare cname
 // TODO add deletion timeout mechanism?
