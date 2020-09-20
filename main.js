@@ -283,7 +283,7 @@ async function createPuzzle() {
   input.oninput = () => drawGrid(input.value);
 
   const button = create(clue, 'button');
-  button.innerText = 'Create!';
+  button.innerText = 'GO';
   button.onclick = publishPuzzle;
 }
 
