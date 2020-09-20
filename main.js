@@ -36,11 +36,11 @@ function getTD(x, y) {
 }
 
 function inBounds(x, y) {
-  return dataDarks[y] && x in dataDarks[y];
+  return darks[y] && x in darks[y];
 }
 
 function writable(x, y) {
-  return inBounds(x, y) && !dataDarks[y][x];
+  return inBounds(x, y) && !darks[y][x];
 }
 
 function getDXY() {
@@ -81,15 +81,12 @@ function isNum(i, row) {
   return true;
 }
 
-/**
- * 
- * @param {boolean[][]} darks 
- */
-function reload(darks) {
+function drawFromDB() {
+  const table = $('grid');
+
   const cols = darks[0].map((_, x) => darks.map(row => row[x]));
   let i = 0, f;
 
-  table.removeChild(table.firstElementChild);
   const tbody = create(table, 'tbody')
   for (const [y, row] of darks.entries()) {
     const tr = create(tbody, 'tr');
@@ -113,19 +110,21 @@ function reload(darks) {
 
   document.documentElement.style.setProperty("--grid-width", darks[0].length);
   updateFocus(...f, false);
+
+  table.onclick = onClick;
+  table.oninput = onInput;
 }  
 
 /**
  * @returns string
  */
 function cellValue(x, y) {
-  if (dataDarks[y][x]) return null;
+  if (darks[y][x]) return null;
   const input = getTD(x, y).firstElementChild;
   return input.value;
 }
 
 /**
- * 
  * @param {MouseEvent} e 
  */
 function onClick(e) {
@@ -134,13 +133,12 @@ function onClick(e) {
   if (!td) return;
 
   const x = td.cellIndex, y = td.parentElement.rowIndex;
-  if (dataDarks[y][x]) return;
+  if (darks[y][x]) return;
 
   updateFocus(x, y, vertical);
 }
 
 /**
- * 
  * @param {InputEvent} e 
  */
 function onInput(e) {
@@ -166,14 +164,10 @@ function onInput(e) {
   }
 }
 
-let vertical;
-let dataDarks;
-const table = $('grid');
-
-const urlParams = new URLSearchParams(window.location.search);
-const databaseId = urlParams.get('id');
-if (!databaseId) { alert('TODO puzzle creation'); } //TODO
-const doc = db.collection("puzzles").doc(databaseId);
+let vertical = false;
+/** @type {boolean[][]} */
+let darks;
+let doc;
 
 function updateChars(doc) {
   if (doc.metadata.hasPendingWrites) return;
@@ -186,21 +180,120 @@ function updateChars(doc) {
   }
 }
 
-async function load() {
+async function play() {
+  doc = db.collection("puzzles").doc(databaseId);
   const darksReq = await doc.get();
-  const {darks} = darksReq.data();
-  dataDarks = darks.trim().split('_')
+  const {darkString} = darksReq.data();
+  darks = darkString.trim().split('_')
     .map(row => row.split('').map(c => c == '@'));
 
-  reload(dataDarks);
+  drawFromDB();
 
-  doc.onSnapshot(updateChars)
-
-  table.onclick = onClick;
-  table.oninput = onInput;
-
-  $('hint').onclick = () => {
+  $('clue').onclick = () => {
     updateFocus(...focus, !vertical);
-  }
+  };
+
+  doc.onSnapshot(updateChars);
 }
-load()
+
+
+function drawGrid(size) {
+  const table = $('grid');
+  table.innerHTML = '';
+
+  if (!size) {
+    size = `${darks[0].length} ${darks.length}`;
+  }
+
+  let [ws, hs, a] = size.split(' ');
+  if (a) {
+    const span = create(table, 'span');
+    span.style.color = 'darkred';
+    span.innerText = '"W H" or "W" (e.g. "5 7")';
+    return;
+  }
+
+  if (!hs) hs = ws;
+  const [w, h] = [ws, hs].map(Number);
+  if (!w || !h) {
+    const span = create(table, 'span');
+    span.style.color = 'darkred';
+    span.innerText = '"W H" or "W" (e.g. "5 7")';
+    return;
+  }
+
+  darks = Array(h).fill().map((_, y) => Array(w).fill().map((_, x) => 
+    Boolean(darks[y] && darks[y][x])));
+  
+  const cols = darks[0].map((_, x) => darks.map(row => row[x]));
+  let i = 0;
+
+  const tbody = create(table, 'tbody')
+  for (const [y, row] of darks.entries()) {
+    const tr = create(tbody, 'tr');
+    for (const [x, b] of row.entries()) {
+      const td = create(tr, 'td');
+
+      if (b) {
+        td.classList.add('dark');
+      }
+
+      if (isNum(x, darks[y]) || isNum(y, cols[x])) {
+        const span = create(td, 'span');
+        span.innerText = ++i;
+      }
+    }
+  }
+
+  document.documentElement.style.setProperty("--grid-width", darks[0].length);
+  table.onclick = addOnClick;
+}
+
+
+/**
+ * @param {MouseEvent} e 
+ */
+function addOnClick(e) {
+  const target = /** @type {HTMLElement} **/ (e.target);
+  const td = target.closest('td');
+  if (!td) return;
+
+  const x = td.cellIndex, y = td.parentElement.rowIndex;
+  darks[y][x] = !darks[y][x];
+
+  drawGrid();
+}
+
+async function publishPuzzle() {
+  const ref = await db.collection("puzzles").add({
+    darkString: darks.map(row => row.map(b => b ? '@' : '.').join('')).join('_'),
+  });
+
+  window.location = `?id=${ref.id}`;
+}
+
+async function createPuzzle() {
+  darks = [[]];
+  drawGrid('3 2');
+
+  const clue = $('clue');
+  clue.innerHTML = '';
+  const input = create(clue, 'input');
+  input.placeholder = 'W H';
+  input.oninput = () => drawGrid(input.value);
+
+  const button = create(clue, 'button');
+  button.innerText = 'Create!';
+  button.onclick = publishPuzzle;
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const databaseId = urlParams.get('id');
+if (databaseId) {
+  play();
+} else {
+  createPuzzle();
+}
+
+// TODO Add to github pages, cloudflare cname
+// TODO add deletion timeout mechanism?
