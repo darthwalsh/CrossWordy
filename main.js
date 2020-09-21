@@ -135,7 +135,12 @@ function onClick(e) {
   const x = td.cellIndex, y = td.parentElement.rowIndex;
   if (darks[y][x]) return;
 
-  updateFocus(x, y, vertical);
+  let newVert = vertical;
+  if (focus[0] == x && focus[1] == y) {
+    newVert = !newVert;
+  }
+
+  updateFocus(x, y, newVert);
 }
 
 /**
