@@ -275,14 +275,23 @@ function addOnClick(e) {
   if (!td) return;
 
   const x = td.cellIndex, y = td.parentElement.rowIndex;
-  darks[y][x] = !darks[y][x];
+  if (darks[y][x]) {
+    darks[y][x] = false;
+    circles[y][x] = true;
+  } else if (circles[y][x]) {
+    circles[y][x] = false;
+  } else {
+    darks[y][x] = true;
+  }
 
   drawGrid();
 }
 
 async function publishPuzzle() {
   const ref = await db.collection("puzzles").add({
-    darkString: darks.map(row => row.map(b => b ? '@' : '.').join('')).join('_'),
+    darkString: darks.map((row, y) => row.map((b, x) => 
+      b ? '@' : circles[y][x] ? 'O' : '.'
+    ).join('')).join('_'),
   });
 
   window.location = `?id=${ref.id}`;
