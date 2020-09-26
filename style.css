@@ -27,7 +27,6 @@ td:after {
   content: "";
   display: block;
   margin-top: 100%;
-  background-color: beige;
 }
 
 td > span {
@@ -44,6 +43,10 @@ td > input {
 
   background: transparent;
   border: none;
+}
+
+.circle {
+  background-color:palegreen
 }
 
 .dark {

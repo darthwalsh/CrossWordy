@@ -97,6 +97,9 @@ function drawFromDB() {
         td.classList.add('dark');
         input.style.display = 'none';
       }
+      if (circles[y][x]) {
+        td.classList.add('circle');
+      }
 
       if (isNum(x, darks[y]) || isNum(y, cols[x])) {
         const span = create(td, 'span');
@@ -171,7 +174,8 @@ function onInput(e) {
 
 let vertical = false;
 /** @type {boolean[][]} */
-let darks;
+let darks
+let circles;
 let doc;
 
 function updateChars(doc) {
@@ -191,6 +195,8 @@ async function play() {
   const {darkString} = darksReq.data();
   darks = darkString.trim().split('_')
     .map(row => row.split('').map(c => c == '@'));
+  circles = darkString.trim().split('_')
+    .map(row => row.split('').map(c => c == 'O'));
 
   drawFromDB();
 
@@ -229,6 +235,8 @@ function drawGrid(size) {
 
   darks = Array(h).fill().map((_, y) => Array(w).fill().map((_, x) => 
     Boolean(darks[y] && darks[y][x])));
+  circles = Array(h).fill().map((_, y) => Array(w).fill().map((_, x) => 
+    Boolean(circles[y] && circles[y][x])));
   
   const cols = darks[0].map((_, x) => darks.map(row => row[x]));
   let i = 0;
@@ -241,6 +249,9 @@ function drawGrid(size) {
 
       if (b) {
         td.classList.add('dark');
+      }
+      if (circles[y][x]) {
+        td.classList.add('circle');
       }
 
       if (isNum(x, darks[y]) || isNum(y, cols[x])) {
@@ -279,6 +290,7 @@ async function publishPuzzle() {
 
 async function createPuzzle() {
   darks = [[]];
+  circles = [[]];
   drawGrid('3 2');
 
   const clue = $('clue');
