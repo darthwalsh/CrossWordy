@@ -47,6 +47,10 @@ function getDXY() {
   return vertical ? [0, 1] : [1, 0];
 }
 
+function getXY(td) {
+  return [td.cellIndex, td.parentElement.rowIndex];
+}
+
 function* getRowCol(x, y) {
   const [dx, dy] = getDXY();
 
@@ -59,7 +63,9 @@ let focus;
 function updateFocus(x, y, newVertical) {
   if (focus) {
     [...getRowCol(...focus)].forEach(xy => getTD(...xy).style.background = '');
+    getTD(...focus).style.background = ''
   }
+
   focus = [x, y];
   vertical = newVertical;
   [...getRowCol(...focus)].forEach(xy => getTD(...xy).style.background = '#A4ABFF');
@@ -116,6 +122,7 @@ function drawFromDB() {
 
   table.onclick = onClick;
   table.oninput = onInput;
+  table.onkeydown = onKeydown;
 }  
 
 /**
@@ -135,7 +142,7 @@ function onClick(e) {
   const td = target.closest('td');
   if (!td) return;
 
-  const x = td.cellIndex, y = td.parentElement.rowIndex;
+  const [x, y] = getXY(td);
   if (darks[y][x]) return;
 
   let newVert = vertical;
@@ -156,8 +163,7 @@ function onInput(e) {
   }
   const td = input.closest('td');
 
-  let x = td.cellIndex, y = td.parentElement.rowIndex;
-
+  let [x, y] = getXY(td);
   doc.update({[`${x}_${y}`]: input.value})
 
   const [dx, dy] = getDXY();
@@ -170,6 +176,59 @@ function onInput(e) {
   if (writable(x, y)) {
     updateFocus(x, y, vertical);
   }
+}
+
+/** @type {Object.<string, {dx?: number, dy?: number, del?: boolean, steps?: number}} */
+const special = {
+  ArrowLeft: {dx: -1},
+  ArrowRight: {dx: 1},
+  ArrowUp: {dy: -1},
+  ArrowDown: {dy: 1},
+  End: {steps: Infinity},
+  Home: {steps: -Infinity},
+  
+  Backspace: {del: true, steps: -1},
+  " ": {del: true, dx: 0},
+  Clear: {del: true, dx: 0},
+  Delete: {del: true, steps: 1},
+}
+
+/**
+ * 
+ * @param {KeyboardEvent} e 
+ */
+function onKeydown(e) {
+  const input = /** @type {HTMLInputElement} **/ (e.target);
+  const td = input.closest('td');
+  if (!td) return;
+
+  if (!(e.key in special)) return;
+  let {dx=0, dy=0, del=false, steps=0} = special[e.key];
+  let [x, y] = getXY(td);
+
+
+  if (del) {
+    input.value = '';
+    doc.update({[getXY(td).join('_')]: input.value})
+  }
+  if (steps) {
+    [dx, dy] = getDXY();
+    if (steps < 0) {
+      [dx, dy, steps] = [-dx, -dy, -steps];
+    }
+
+    while (inBounds(x + dx, y + dy) && writable(x + dx, y + dy) && steps) {
+      x += dx;
+      y += dy;
+      --steps;
+    }
+    updateFocus(x, y, vertical);
+  } else {
+    if (inBounds(x + dx, y + dy) && writable(x + dx, y + dy)) {
+      updateFocus(x + dx, y + dy, vertical);
+    }
+  }
+  return false;
 }
 
 let vertical = false;
@@ -262,7 +321,7 @@ function drawGrid(size) {
   }
 
   document.documentElement.style.setProperty("--grid-width", darks[0].length);
-  table.onclick = addOnClick;
+  table.onclick = addOnClick;  
 }
 
 
@@ -274,7 +333,7 @@ function addOnClick(e) {
   const td = target.closest('td');
   if (!td) return;
 
-  const x = td.cellIndex, y = td.parentElement.rowIndex;
+  const [x, y] = getXY(td);
   if (darks[y][x]) {
     darks[y][x] = false;
     circles[y][x] = true;
