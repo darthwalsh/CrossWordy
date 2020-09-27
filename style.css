@@ -37,9 +37,9 @@ td > span {
 td > input {
   position: absolute;
   width: 100%;
-  margin-top: calc(20vw / var(--grid-width));
+  margin-top: calc(30vw / var(--grid-width));
   text-align: center;
-  font-size: calc(70vw / var(--grid-width));
+  font-size: calc(50vw / var(--grid-width));
 
   background: transparent;
   border: none;
