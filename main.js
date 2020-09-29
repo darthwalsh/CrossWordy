@@ -59,11 +59,15 @@ function* getRowCol(x, y) {
     yield [x, y];
 }
 
-let focus;
+let focus = [0, 0];
 function updateFocus(x, y, newVertical) {
   if (focus) {
     [...getRowCol(...focus)].forEach(xy => getTD(...xy).style.background = '');
     getTD(...focus).style.background = ''
+  }
+
+  if (x != focus[0] || y != focus[1]) {
+    $('rebus').checked = cellValue(x, y).length > 1;
   }
 
   focus = [x, y];
@@ -123,6 +127,8 @@ function drawFromDB() {
   table.onclick = onClick;
   table.oninput = onInput;
   table.onkeydown = onKeydown;
+
+  $('rebus').oninput = _ => updateFocus(...focus, vertical)
 }  
 
 /**
@@ -132,6 +138,26 @@ function cellValue(x, y) {
   if (darks[y][x]) return null;
   const input = getTD(x, y).firstElementChild;
   return input.value;
+}
+
+function isRebus() {
+  return $('rebus').checked;
+}
+
+const measurer = $('measurer')
+function measureText(s) {
+  measurer.innerText = s;
+  return measurer.clientWidth;
+}
+
+/** @param {HTMLInputElement} input */
+function scaleInput(input) {
+  if (input.value.length <= 1) {
+    input.style.setProperty('--font-scale', '');
+  } else {
+    const ratio = Math.min(1, 15 / measureText(input.value));
+    input.style.setProperty('--font-scale', ratio);
+  }
 }
 
 /**
@@ -158,16 +184,18 @@ function onClick(e) {
  */
 function onInput(e) {
   const input = /** @type {HTMLInputElement} **/ (e.target);
-  if (input.value.length > 1) {
+  if (input.value.length > 1 && !isRebus()) {
     input.value = input.value.slice(-1);
   }
   const td = input.closest('td');
 
   let [x, y] = getXY(td);
-  doc.update({[`${x}_${y}`]: input.value})
+  doc.update({[`${x}_${y}`]: input.value});
+
+  scaleInput(input);
+  if (isRebus()) return;
 
   const [dx, dy] = getDXY();
-
   while (inBounds(x, y) && cellValue(x, y)) {
     x += dx;
     y += dy;
@@ -198,6 +226,8 @@ const special = {
  * @param {KeyboardEvent} e 
  */
 function onKeydown(e) {
+  if (isRebus()) return;
+
   const input = /** @type {HTMLInputElement} **/ (e.target);
   const td = input.closest('td');
   if (!td) return;
@@ -244,7 +274,9 @@ function updateChars(doc) {
   for (const key in data) {
     if (!/\d+_\d+/.test(key)) continue;
     const [x, y] = key.split('_').map(Number);
-    getTD(x, y).firstElementChild.value = data[key];
+    const input = getTD(x, y).firstElementChild;
+    input.value = data[key];
+    scaleInput(input);
   }
 }
 

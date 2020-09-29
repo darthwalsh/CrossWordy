@@ -14,6 +14,24 @@ h1 {
   font-size: 8vw
 }
 
+.topleft {
+  position: absolute;
+  top: 0;
+  font-size: 6vw
+}
+input[type=checkbox] {
+  width: 4vw;
+  height: 4vw;
+  margin-top: 2.5vw;
+}
+
+#topright > img {
+  position: absolute;
+  top: 0.5vw;
+  right: 0.5vw;
+  height: 8vw;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -37,12 +55,13 @@ td > span {
 td > input {
   position: absolute;
   width: 100%;
-  margin-top: calc(30vw / var(--grid-width));
+  margin-top: calc((30vw + 25vw * (1 - var(--font-scale, 1))) / var(--grid-width));
   text-align: center;
-  font-size: calc(50vw / var(--grid-width));
+  font-size: calc(var(--font-scale, 1) * 50vw / var(--grid-width));
 
   background: transparent;
-  border: none;
+  border: 0;
+  padding: 0;
 }
 
 .circle {
@@ -63,7 +82,7 @@ td > input {
 }
 
 #clue > input {
-  border:0;
+  border: 0;
   background-color: #A4ABFF;
   font-size: calc(80vw / var(--grid-width));
   width: 59vw;
@@ -76,4 +95,12 @@ td > input {
   width: 39vw;
   height: 100%;
   float: right;
+}
+
+#measurer {
+  width: auto;
+  display: inline-block;
+  visibility: hidden;
+  position: fixed;
+  overflow: auto;
 }

@@ -8,10 +8,20 @@
 </head>
 
 <body>
-  <h1><a href="https://github.com/darthwalsh/CrossWordy">darthwalsh's</a> CrossWordy</h1>
+  <h1>CrossWordy</h1>
+  <div class="topleft">
+    <input id="rebus" type="checkbox" />
+    <label for="rebus">Rebus</label>
+  </div>
+  <a id="topright" href="https://github.com/darthwalsh/CrossWordy" target="_blank">
+    <img height="20" src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/github.svg" />
+  </a>
+  
   <table id="grid">
   </table>
   <div id="clue">clue</div>
+
+  <div id='measurer'></div>
 
   <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-firestore.js"></script>
