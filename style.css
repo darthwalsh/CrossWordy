@@ -82,19 +82,21 @@ td > input {
 }
 
 #clue {
-  width: 100%;
+  width: 98vw;
   text-align: center;
   background-color: #A4ABFF;
   height: calc(100vw / var(--grid-width));
-  font-size: calc(80vw / var(--grid-width));
-  margin-top: 2vw;
+  font-size: calc(var(--font-scale, 1) * 80vw / var(--grid-width));
+  margin-top: 2px;
+  padding-left: 1vw;
+  padding-right: 1vw;
 }
 
 #clue > input {
   border: 0;
   background-color: #A4ABFF;
   font-size: calc(80vw / var(--grid-width));
-  width: 59vw;
+  width: 57vw;
 }
 
 #clue > button {
@@ -104,6 +106,35 @@ td > input {
   width: 39vw;
   height: 100%;
   float: right;
+}
+
+#clues {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  
+  font-size: 4vw;
+  margin-left: 0.5vw;
+  margin-right: 0.5vw;
+}
+
+#clues h3 {
+  margin: 0;
+  font-size: 6vw;
+}
+
+#clues textarea {
+  width: 100%;
+  margin: 0;
+  resize: vertical;
+  box-sizing: border-box;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: scroll;
+}
+
+#clues button {
+  position: absolute;
+  left:40vw;
 }
 
 #measurer {
