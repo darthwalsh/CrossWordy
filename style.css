@@ -64,6 +64,7 @@ td > input {
   background: transparent;
   border: 0;
   padding: 0;
+  outline: none;
 }
 
 .circle:before {
