@@ -249,7 +249,6 @@ const special = {
   Home: {steps: -Infinity},
   
   Backspace: {del: true, steps: -1},
-  " ": {del: true, dx: 0},
   Clear: {del: true, dx: 0},
   Delete: {del: true, steps: 1},
 }
@@ -266,9 +265,14 @@ function onKeydown(e) {
   const td = input.closest('td');
   if (!td) return;
 
+  let [x, y] = getXY(td);
+
+  if (e.key == ' ') {
+    updateFocus(x, y, !vertical);
+    return false;
+  }
   if (!(e.key in special)) return;
   let {dx=0, dy=0, del=false, steps=0} = special[e.key];
-  let [x, y] = getXY(td);
 
 
   if (del) {
