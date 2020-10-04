@@ -159,7 +159,7 @@ function drawFromDB() {
   table.oninput = onInput;
   table.onkeydown = onKeydown;
 
-  $('rebus').oninput = _ => updateFocus(...focus, vertical)
+  $('rebus').oninput = () => updateFocus(...focus, vertical)
 }  
 
 /**
@@ -454,6 +454,16 @@ async function publishPuzzle() {
  * @param {HTMLTextAreaElement} textArea 
  */
 function validateClues(textArea) {
+  const formatedValue = (textArea.value || '')
+    .replace(/\n+/g, '\n')
+    .replace(/\n(?!\d+ )/g, ' ')
+    .replace(/\n/g, '\n\n');
+
+  if (formatedValue != textArea.value) {
+    textArea.value = formatedValue;
+    textArea.style.height = textArea.scrollHeight + 20 + 'px';
+  }
+
   const h3 = textArea.previousElementSibling;
   h3.innerText = h3.innerText.split(' ')[0];
   
@@ -508,37 +518,62 @@ function validateClues(textArea) {
   h3.style.background = 'green';
 }
 
+function onUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.readAsArrayBuffer(file);
+  reader.onloadend = evt => fromUpload(evt.target.result);
+}
+
+function fromUpload(buffer) {
+  const puz = Puz.decode(buffer);
+  const {grid, clues} = puz;
+  const circleSet = new Set(puz.circles);
+
+  const w = grid[0].length, h = grid.length, wh = `${w} ${h}`;
+  $('w_h').value = wh;
+  
+  darks = grid.map(row => row.map(c => c == '.'));
+  circles = darks.map((row, y) => row.map((_, x) => circleSet.has(w * y + x)));
+
+  drawCreateGrid(wh);
+
+  for (const k in clues) {
+    const textArea = $(k[0] + 'clues'); // i.e. 'aclues'
+    textArea.value = clues[k].map((s, i) => i + ' ' + s).join('\n').trim();
+    validateClues(textArea);
+  }
+}
+
 const clueIds = ['aclues', 'dclues'];
 async function createPuzzle() {
   darks = [[]];
   circles = [[]];
   drawCreateGrid('3 2');
 
+  const upload = create(document.getElementsByTagName('h1')[0], 'input', {type: 'file'});
+
+  upload.onchange = onUpload;
+  $('topleft').style.display = 'none';
+
+
   const clue = $('clue');
   clue.innerHTML = '';
-  const input = create(clue, 'input');
+  const input = create(clue, 'input', {id: 'w_h'});
   input.placeholder = 'W H';
   input.oninput = () => drawCreateGrid(input.value);
 
   const format = create($('clues'), 'button');
   format.innerText = 'FORMAT';
-  format.onclick = _ => clueIds.forEach(c => {
-    const textArea = $(c);
-    textArea.value = textArea.value
-      .replace(/\n+/g, '\n')
-      .replace(/\n(?!\d+ )/g, ' ')
-      .replace(/\n/g, '\n\n');
-    validateClues(textArea);
-  });
+  format.onclick = () => clueIds.forEach(c => validateClues($(c)));
 
   for (const cId of clueIds) {
     const parent = $(cId).parentElement;
     parent.removeChild($(cId));
     const textArea = create(parent, 'textarea', {id: cId})
-    textArea.oninput = _ => {
-      textArea.style.height = textArea.scrollHeight + 20 + 'px';
-      validateClues(textArea);
-    }
+    textArea.oninput = () => validateClues(textArea);
   }
 
   const button = create(clue, 'button');
