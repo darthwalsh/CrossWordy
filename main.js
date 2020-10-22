@@ -160,6 +160,7 @@ function drawFromDB() {
   table.onclick = onClick;
   table.oninput = onInput;
   table.onkeydown = onKeydown;
+  table.onkeyup = onKeyup;
 
   $('rebus').oninput = () => updateFocus(...focus, vertical)
 }  
@@ -277,13 +278,12 @@ function onKeydown(e) {
 
   let [x, y] = getXY(td);
 
-  if (e.key == ' ') {
+  if (e.key === ' ') {
     updateFocus(x, y, !vertical);
     return false;
   }
   if (!(e.key in special)) return;
   let {dx=0, dy=0, del=false, steps=0} = special[e.key];
-
 
   if (del) {
     input.value = '';
@@ -308,6 +308,21 @@ function onKeydown(e) {
     }
   }
   return false;
+}
+
+/**
+ * 
+ * @param {KeyboardEvent} e 
+ */
+function onKeyup(e) {
+  if (e.key !== 'Tab') return;
+
+  /** @type {HTMLInputElement} **/
+  const input = e.target;
+  const td = input.closest('td');
+  if (!td) return;
+
+  updateFocus(...getXY(td), vertical, {noRebus: true});
 }
 
 let vertical = false;
