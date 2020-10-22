@@ -60,13 +60,15 @@ function* getRowCol(x, y) {
 }
 
 let focus = [0, 0];
-function updateFocus(x, y, newVertical) {
+function updateFocus(x, y, newVertical, {noRebus=false} = {}) {
   if (focus) {
     [...getRowCol(...focus)].forEach(xy => getTD(...xy).style.background = '');
     getTD(...focus).style.background = ''
   }
 
-  if (x != focus[0] || y != focus[1]) {
+  if (noRebus) { 
+    $('rebus').checked = false;
+  } else if (x != focus[0] || y != focus[1]) {
     $('rebus').checked = cellValue(x, y).length > 1;
   }
 
@@ -299,10 +301,10 @@ function onKeydown(e) {
       y += dy;
       --steps;
     }
-    updateFocus(x, y, vertical);
+    updateFocus(x, y, vertical, {noRebus: true});
   } else {
     if (inBounds(x + dx, y + dy) && writable(x + dx, y + dy)) {
-      updateFocus(x + dx, y + dy, vertical);
+      updateFocus(x + dx, y + dy, vertical, {noRebus: true});
     }
   }
   return false;
