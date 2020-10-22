@@ -60,6 +60,7 @@ td > input {
   margin-top: calc((30vw + 25vw * (1 - var(--font-scale, 1))) / var(--grid-width));
   text-align: center;
   font-size: calc(var(--font-scale, 1) * 50vw / var(--grid-width));
+  text-transform: uppercase;
 
   background: transparent;
   border: 0;
@@ -76,6 +77,10 @@ td > input {
   border-radius: 50%;
   width: 100%;
   height: 100%;
+}
+
+.lowercase {
+  background-color: lightgray;
 }
 
 .dark {

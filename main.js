@@ -182,12 +182,20 @@ function measureText(s) {
 }
 
 /** @param {HTMLInputElement} input */
-function scaleInput(input) {
-  if (input.value.length <= 1) {
+function updateCellPresentation(input) {
+  const {value} = input;
+  if (value.length <= 1) {
     input.style.setProperty('--font-scale', '');
   } else {
-    const ratio = Math.min(1, 15 / measureText(input.value));
+    const ratio = Math.min(1, 15 / measureText(value));
     input.style.setProperty('--font-scale', ratio);
+  }
+
+  const td = input.closest('td');
+  if (value === value.toUpperCase()) {
+    td.classList.remove('lowercase');
+  } else {
+    td.classList.add('lowercase');
   }
 }
 
@@ -225,7 +233,7 @@ function onInput(e) {
   let [x, y] = getXY(td);
   doc.update({[`${x}_${y}`]: input.value});
 
-  scaleInput(input);
+  updateCellPresentation(input);
   if (isRebus()) return;
 
   const [dx, dy] = getDXY();
@@ -278,6 +286,7 @@ function onKeydown(e) {
   if (del) {
     input.value = '';
     doc.update({[getXY(td).join('_')]: input.value})
+    updateCellPresentation(input);
   }
   if (steps) {
     [dx, dy] = getDXY();
@@ -314,7 +323,7 @@ function updateChars(doc) {
     const [x, y] = key.split('_').map(Number);
     const input = getTD(x, y).firstElementChild;
     input.value = data[key];
-    scaleInput(input);
+    updateCellPresentation(input);
   }
 }
 
