@@ -163,7 +163,22 @@ function drawFromDB() {
   table.onkeyup = onKeyup;
 
   $('rebus').oninput = () => updateFocus(...focus, vertical)
-}  
+}
+
+/**
+ * 
+ * @param {HTMLElement} parent 
+ * @param {Map<string, string>} clues 
+ * @param {Map<string, HTMLLIElement} map 
+ */
+function drawClues(parent, clues, map) {
+  const ol = create(parent, 'ol');
+  for (const [n, text] of clues.entries()) {
+    const li = create(ol, 'li', {value: +n});
+    li.innerText = text;
+    map.set(n, li);
+  }
+}
 
 /**
  * @returns string
@@ -329,6 +344,7 @@ let vertical = false;
 /** @type {boolean[][]} */
 let darks, circles;
 let aClues = new Map(), dClues = new Map();
+let aClueDOM = new Map(), dClueDOM = new Map();
 let doc;
 
 function updateChars(doc) {
@@ -363,8 +379,8 @@ async function play() {
   if (across) {
     aClues = parseClues(across);
     dClues = parseClues(down);
-    $('aclues').innerText = across;
-    $('dclues').innerText = down;
+    drawClues($("aclues"), aClues, aClueDOM);
+    drawClues($("dclues"), dClues, dClueDOM);
   } else {
     $('clues').innerHTML = '';
   }
