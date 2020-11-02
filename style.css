@@ -117,7 +117,7 @@ td > input {
 #clues {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  
+
   font-size: 2vw;
   font-family: Arial, sans-serif;
   margin-left: 0.5vw;
@@ -131,6 +131,8 @@ td > input {
 
 #clues ol {
   margin: 0;
+  padding-left: 0;
+  list-style-position: inside;
 }
 
 /* TODO update this from JS on each letter change it clue is done
