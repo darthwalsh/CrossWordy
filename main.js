@@ -489,13 +489,13 @@ async function publishPuzzle() {
  * @param {HTMLTextAreaElement} textArea 
  */
 function validateClues(textArea) {
-  const formatedValue = (textArea.value || '')
+  const formattedValue = (textArea.value || '')
     .replace(/\n+/g, '\n')
     .replace(/\n(?!\d+ )/g, ' ')
     .replace(/\n/g, '\n\n');
 
-  if (formatedValue != textArea.value) {
-    textArea.value = formatedValue;
+  if (formattedValue != textArea.value) {
+    textArea.value = formattedValue;
     textArea.style.height = textArea.scrollHeight + 20 + 'px';
   }
 
