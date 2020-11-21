@@ -367,7 +367,7 @@ function parseClues(s) {
 async function play() {
   doc = db.collection("puzzles").doc(databaseId);
   const darksReq = await doc.get();
-  const {darkString, across = "", down = ""} = darksReq.data();
+  const {darkString, across = "", down = "", title = ""} = darksReq.data();
   darks = darkString
     .trim()
     .split("_")
@@ -384,6 +384,10 @@ async function play() {
     drawClues($("dclues"), dClues, dClueDOM);
   } else {
     $("clues").innerHTML = "";
+  }
+
+  if (title) {
+    $("title").innerText = title;
   }
 
   drawFromDB();
@@ -493,10 +497,16 @@ async function publishPuzzle() {
   const across = $("aclues").value.replace(/\n+/g, "\n");
   const down = $("dclues").value.replace(/\n+/g, "\n");
 
+  let title = $("title").innerText;
+  if (title == "CrossWordy") {
+    title = "";
+  }
+
   const ref = await db.collection("puzzles").add({
     darkString,
     across,
     down,
+    title,
   });
 
   window.location = `?id=${ref.id}`;
@@ -584,7 +594,11 @@ function onUpload(e) {
 
 function fromUpload(buffer) {
   const puz = Puz.decode(buffer);
-  const {grid, clues} = puz;
+  const {
+    grid,
+    clues,
+    meta: {title},
+  } = puz;
   const circleSet = new Set(puz.circles);
 
   const w = grid[0].length,
@@ -605,6 +619,9 @@ function fromUpload(buffer) {
       .trim();
     validateClues(textArea);
   }
+
+  const titleAfterYear = title.replace(/.*\d{4} */, "");
+  $("title").innerText = titleAfterYear || "CrossWordy";
 }
 
 const clueIds = ["aclues", "dclues"];
@@ -613,7 +630,10 @@ async function createPuzzle() {
   circles = [[]];
   drawCreateGrid("3 2");
 
-  const upload = create(document.getElementsByTagName("h1")[0], "input", {type: "file"});
+  const upload = create(document.getElementsByTagName("h1")[0], "input", {
+    type: "file",
+    accept: ".puz",
+  });
 
   upload.onchange = onUpload;
   $("topleft").style.display = "none";
@@ -638,6 +658,8 @@ async function createPuzzle() {
   const button = create(clue, "button");
   button.innerText = "GO";
   button.onclick = publishPuzzle;
+
+  $("title").contentEditable = "true";
 }
 
 const urlParams = new URLSearchParams(window.location.search);

@@ -8,25 +8,34 @@ body {
   overflow-x: hidden;
 }
 
+header {
+  display: flex;
+  align-items: center;
+}
+
 h1 {
+  flex-grow: 1;
   text-align: center;
-  margin: 0;
-  font-size: 8vw;
+  margin: 0 1vw;
+  font-size: 6vw;
 }
 
 #topleft {
-  position: absolute;
-  top: 0;
-  font-size: 6vw;
+  flex-shrink: 0;
+  font-size: 4vw;
 }
-input[type="checkbox"] {
-  width: 4vw;
-  height: 4vw;
-  margin-top: 2.5vw;
+
+#topleft input[type="checkbox"] {
+  width: 3vw;
+  height: 3vw;
+  margin-right: 0;
+}
+
+#topleft label {
+  margin-left: -1vw;
 }
 
 #topright > img {
-  position: absolute;
   top: 0.5vw;
   right: 0.5vw;
   height: 8vw;
