@@ -208,13 +208,6 @@ function updateCellPresentation(input) {
     const ratio = Math.min(1, 15 / measureText(value));
     input.style.setProperty('--font-scale', ratio);
   }
-
-  const td = input.closest('td');
-  if (value === value.toUpperCase()) {
-    td.classList.remove('lowercase');
-  } else {
-    td.classList.add('lowercase');
-  }
 }
 
 /**

@@ -79,10 +79,6 @@ td > input {
   height: 100%;
 }
 
-.lowercase {
-/*   TODO? background-color: lightgray; */
-}
-
 .dark {
   background-color: gray;
 }
