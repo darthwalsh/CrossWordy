@@ -12,23 +12,23 @@ function $(id) {
 }
 
 /**
- * @param {HTMLElement} parent 
- * @param {string} name 
+ * @param {HTMLElement} parent
+ * @param {string} name
  * @param {Object.<string, string>} attributes
  */
 function create(parent, name, attributes = {}) {
   const node = document.createElement(name);
   parent.appendChild(node);
   for (const prop in attributes) {
-    node.setAttribute(prop, attributes[prop])
+    node.setAttribute(prop, attributes[prop]);
   }
   return node;
 }
 
 /**
- * 
- * @param {number} x 
- * @param {number} y 
+ *
+ * @param {number} x
+ * @param {number} y
  * @returns {HTMLElement}
  */
 function getTD(x, y) {
@@ -54,39 +54,38 @@ function getXY(td) {
 function* getRowCol(x, y) {
   const [dx, dy] = getDXY();
 
-  for (; writable(x - dx, y - dy); x -= dx, y -= dy) { }
-  for (; writable(x, y); x += dx, y += dy)
-    yield [x, y];
+  for (; writable(x - dx, y - dy); x -= dx, y -= dy) {}
+  for (; writable(x, y); x += dx, y += dy) yield [x, y];
 }
 
 let focus = [0, 0];
-function updateFocus(x, y, newVertical, {noRebus=false} = {}) {
+function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   if (focus) {
-    [...getRowCol(...focus)].forEach(xy => getTD(...xy).style.background = '');
-    getTD(...focus).style.background = ''
+    [...getRowCol(...focus)].forEach(xy => (getTD(...xy).style.background = ""));
+    getTD(...focus).style.background = "";
   }
 
-  if (noRebus) { 
-    $('rebus').checked = false;
+  if (noRebus) {
+    $("rebus").checked = false;
   } else if (x != focus[0] || y != focus[1]) {
-    $('rebus').checked = cellValue(x, y).length > 1;
+    $("rebus").checked = cellValue(x, y).length > 1;
   }
 
   focus = [x, y];
   vertical = newVertical;
   const rowCol = [...getRowCol(...focus)];
-  rowCol.forEach(xy => getTD(...xy).style.background = '#A4ABFF');
+  rowCol.forEach(xy => (getTD(...xy).style.background = "#A4ABFF"));
 
   const td = getTD(...focus);
-  td.style.background = 'yellow';
+  td.style.background = "yellow";
   td.firstElementChild.select();
 
-  const clue = $('clue');
+  const clue = $("clue");
   const clueNum = getTD(...rowCol[0]).firstElementChild.nextElementSibling.innerText;
-  clue.innerText = (vertical ? dClues : aClues).get(clueNum) || 'flip';
+  clue.innerText = (vertical ? dClues : aClues).get(clueNum) || "flip";
 
   const scale = n => {
-    clue.style.setProperty('--font-scale', n);
+    clue.style.setProperty("--font-scale", n);
     return clue.scrollHeight <= clue.clientHeight;
   };
   const ratio = binarySet(1, 0.1, scale); // precision / perf tradeoff
@@ -94,10 +93,10 @@ function updateFocus(x, y, newVertical, {noRebus=false} = {}) {
 }
 
 /**
- * 
- * @param {number} hi 
- * @param {number} epsilon 
- * @param {function(int): boolean} ok 
+ *
+ * @param {number} hi
+ * @param {number} epsilon
+ * @param {function(int): boolean} ok
  */
 function binarySet(hi, epsilon, ok) {
   if (ok(hi)) return hi;
@@ -113,9 +112,9 @@ function binarySet(hi, epsilon, ok) {
 }
 
 /**
- * 
- * @param {number} i 
- * @param {boolean[]} row 
+ *
+ * @param {number} i
+ * @param {boolean[]} row
  */
 function isNum(i, row) {
   if (row[i]) return false;
@@ -125,27 +124,28 @@ function isNum(i, row) {
 }
 
 function drawFromDB() {
-  const table = $('grid');
+  const table = $("grid");
 
   const cols = darks[0].map((_, x) => darks.map(row => row[x]));
-  let i = 0, f;
+  let i = 0,
+    f;
 
-  const tbody = create(table, 'tbody')
+  const tbody = create(table, "tbody");
   for (const [y, row] of darks.entries()) {
-    const tr = create(tbody, 'tr');
+    const tr = create(tbody, "tr");
     for (const [x, b] of row.entries()) {
-      const td = create(tr, 'td');
-      const input = create(td, 'input');
+      const td = create(tr, "td");
+      const input = create(td, "input");
       if (b) {
-        td.classList.add('dark');
-        input.style.display = 'none';
+        td.classList.add("dark");
+        input.style.display = "none";
       }
       if (circles[y][x]) {
-        td.classList.add('circle');
+        td.classList.add("circle");
       }
 
       if (isNum(x, darks[y]) || isNum(y, cols[x])) {
-        const span = create(td, 'span');
+        const span = create(td, "span");
         if (!i) {
           f = [x, y];
         }
@@ -162,19 +162,19 @@ function drawFromDB() {
   table.onkeydown = onKeydown;
   table.onkeyup = onKeyup;
 
-  $('rebus').oninput = () => updateFocus(...focus, vertical)
+  $("rebus").oninput = () => updateFocus(...focus, vertical);
 }
 
 /**
- * 
- * @param {HTMLElement} parent 
- * @param {Map<string, string>} clues 
- * @param {Map<string, HTMLLIElement} map 
+ *
+ * @param {HTMLElement} parent
+ * @param {Map<string, string>} clues
+ * @param {Map<string, HTMLLIElement} map
  */
 function drawClues(parent, clues, map) {
-  const ol = create(parent, 'ol');
+  const ol = create(parent, "ol");
   for (const [n, text] of clues.entries()) {
-    const li = create(ol, 'li', {value: +n});
+    const li = create(ol, "li", {value: +n});
     li.innerText = text;
     map.set(n, li);
   }
@@ -190,10 +190,10 @@ function cellValue(x, y) {
 }
 
 function isRebus() {
-  return $('rebus').checked;
+  return $("rebus").checked;
 }
 
-const measurer = $('measurer')
+const measurer = $("measurer");
 function measureText(s) {
   measurer.innerText = s;
   return measurer.clientWidth;
@@ -203,20 +203,20 @@ function measureText(s) {
 function updateCellPresentation(input) {
   const {value} = input;
   if (value.length <= 1) {
-    input.style.setProperty('--font-scale', '');
+    input.style.setProperty("--font-scale", "");
   } else {
     const ratio = Math.min(1, 15 / measureText(value));
-    input.style.setProperty('--font-scale', ratio);
+    input.style.setProperty("--font-scale", ratio);
   }
 }
 
 /**
- * @param {MouseEvent} e 
+ * @param {MouseEvent} e
  */
 function onClick(e) {
   /** @type {HTMLElement} **/
   const target = e.target;
-  const td = target.closest('td');
+  const td = target.closest("td");
   if (!td) return;
 
   const [x, y] = getXY(td);
@@ -231,7 +231,7 @@ function onClick(e) {
 }
 
 /**
- * @param {InputEvent} e 
+ * @param {InputEvent} e
  */
 function onInput(e) {
   /** @type {HTMLInputElement} **/
@@ -239,7 +239,7 @@ function onInput(e) {
   if (input.value.length > 1 && !isRebus()) {
     input.value = input.value.slice(-1);
   }
-  const td = input.closest('td');
+  const td = input.closest("td");
 
   let [x, y] = getXY(td);
   doc.update({[`${x}_${y}`]: input.value});
@@ -266,36 +266,36 @@ const special = {
   ArrowDown: {dy: 1},
   End: {steps: Infinity},
   Home: {steps: -Infinity},
-  
+
   Backspace: {del: true, steps: -1},
   Clear: {del: true, dx: 0},
   Delete: {del: true, steps: 1},
-}
+};
 
 /**
- * 
- * @param {KeyboardEvent} e 
+ *
+ * @param {KeyboardEvent} e
  */
 function onKeydown(e) {
   if (isRebus()) return;
 
   /** @type {HTMLInputElement} **/
   const input = e.target;
-  const td = input.closest('td');
+  const td = input.closest("td");
   if (!td) return;
 
   let [x, y] = getXY(td);
 
-  if (e.key === ' ') {
+  if (e.key === " ") {
     updateFocus(x, y, !vertical);
     return false;
   }
   if (!(e.key in special)) return;
-  let {dx=0, dy=0, del=false, steps=0} = special[e.key];
+  let {dx = 0, dy = 0, del = false, steps = 0} = special[e.key];
 
   if (del) {
-    input.value = '';
-    doc.update({[getXY(td).join('_')]: input.value})
+    input.value = "";
+    doc.update({[getXY(td).join("_")]: input.value});
     updateCellPresentation(input);
   }
   if (steps) {
@@ -319,15 +319,15 @@ function onKeydown(e) {
 }
 
 /**
- * 
- * @param {KeyboardEvent} e 
+ *
+ * @param {KeyboardEvent} e
  */
 function onKeyup(e) {
-  if (e.key !== 'Tab') return;
+  if (e.key !== "Tab") return;
 
   /** @type {HTMLInputElement} **/
   const input = e.target;
-  const td = input.closest('td');
+  const td = input.closest("td");
   if (!td) return;
 
   updateFocus(...getXY(td), vertical, {noRebus: true});
@@ -336,17 +336,19 @@ function onKeyup(e) {
 let vertical = false;
 /** @type {boolean[][]} */
 let darks, circles;
-let aClues = new Map(), dClues = new Map();
-let aClueDOM = new Map(), dClueDOM = new Map();
+let aClues = new Map(),
+  dClues = new Map();
+let aClueDOM = new Map(),
+  dClueDOM = new Map();
 let doc;
 
 function updateChars(doc) {
   if (doc.metadata.hasPendingWrites) return;
-  
+
   const data = doc.data();
   for (const key in data) {
     if (!/\d+_\d+/.test(key)) continue;
-    const [x, y] = key.split('_').map(Number);
+    const [x, y] = key.split("_").map(Number);
     const input = getTD(x, y).firstElementChild;
     input.value = data[key];
     updateCellPresentation(input);
@@ -354,33 +356,39 @@ function updateChars(doc) {
 }
 
 function parseClues(s) {
-  return new Map(s.split(/\n+/g).map(line => {
-    const [n, ...rest] = line.split(' ');
-    return [n, rest.join(' ')];
-  }));
+  return new Map(
+    s.split(/\n+/g).map(line => {
+      const [n, ...rest] = line.split(" ");
+      return [n, rest.join(" ")];
+    })
+  );
 }
 
 async function play() {
   doc = db.collection("puzzles").doc(databaseId);
   const darksReq = await doc.get();
-  const {darkString, across='', down=''} = darksReq.data();
-  darks = darkString.trim().split('_')
-    .map(row => row.split('').map(c => c == '@'));
-  circles = darkString.trim().split('_')
-    .map(row => row.split('').map(c => c == 'O'));
-   
+  const {darkString, across = "", down = ""} = darksReq.data();
+  darks = darkString
+    .trim()
+    .split("_")
+    .map(row => row.split("").map(c => c == "@"));
+  circles = darkString
+    .trim()
+    .split("_")
+    .map(row => row.split("").map(c => c == "O"));
+
   if (across) {
     aClues = parseClues(across);
     dClues = parseClues(down);
     drawClues($("aclues"), aClues, aClueDOM);
     drawClues($("dclues"), dClues, dClueDOM);
   } else {
-    $('clues').innerHTML = '';
+    $("clues").innerHTML = "";
   }
 
   drawFromDB();
 
-  $('clue').onclick = () => {
+  $("clue").onclick = () => {
     updateFocus(...focus, !vertical);
   };
 
@@ -388,17 +396,17 @@ async function play() {
 }
 
 function drawCreateGrid(size) {
-  const table = $('grid');
-  table.innerHTML = '';
+  const table = $("grid");
+  table.innerHTML = "";
 
   if (!size) {
     size = `${darks[0].length} ${darks.length}`;
   }
 
-  let [ws, hs, a] = size.split(' ');
+  let [ws, hs, a] = size.split(" ");
   if (a) {
-    const span = create(table, 'span');
-    span.style.color = 'darkred';
+    const span = create(table, "span");
+    span.style.color = "darkred";
     span.innerText = '"W H" or "W" (e.g. "5 7")';
     return;
   }
@@ -406,35 +414,45 @@ function drawCreateGrid(size) {
   if (!hs) hs = ws;
   const [w, h] = [ws, hs].map(Number);
   if (!w || !h) {
-    const span = create(table, 'span');
-    span.style.color = 'darkred';
+    const span = create(table, "span");
+    span.style.color = "darkred";
     span.innerText = '"W H" or "W" (e.g. "5 7")';
     return;
   }
 
-  darks = Array(h).fill().map((_, y) => Array(w).fill().map((_, x) => 
-    Boolean(darks[y] && darks[y][x])));
-  circles = Array(h).fill().map((_, y) => Array(w).fill().map((_, x) => 
-    Boolean(circles[y] && circles[y][x])));
-  
+  darks = Array(h)
+    .fill()
+    .map((_, y) =>
+      Array(w)
+        .fill()
+        .map((_, x) => Boolean(darks[y] && darks[y][x]))
+    );
+  circles = Array(h)
+    .fill()
+    .map((_, y) =>
+      Array(w)
+        .fill()
+        .map((_, x) => Boolean(circles[y] && circles[y][x]))
+    );
+
   const cols = darks[0].map((_, x) => darks.map(row => row[x]));
   let i = 0;
 
-  const tbody = create(table, 'tbody')
+  const tbody = create(table, "tbody");
   for (const [y, row] of darks.entries()) {
-    const tr = create(tbody, 'tr');
+    const tr = create(tbody, "tr");
     for (const [x, b] of row.entries()) {
-      const td = create(tr, 'td');
+      const td = create(tr, "td");
 
       if (b) {
-        td.classList.add('dark');
+        td.classList.add("dark");
       }
       if (circles[y][x]) {
-        td.classList.add('circle');
+        td.classList.add("circle");
       }
 
       if (isNum(x, darks[y]) || isNum(y, cols[x])) {
-        const span = create(td, 'span');
+        const span = create(td, "span");
         span.innerText = ++i;
       }
     }
@@ -443,17 +461,16 @@ function drawCreateGrid(size) {
   clueIds.forEach(c => validateClues($(c)));
 
   document.documentElement.style.setProperty("--grid-width", darks[0].length);
-  table.onclick = addOnClick;  
+  table.onclick = addOnClick;
 }
 
-
 /**
- * @param {MouseEvent} e 
+ * @param {MouseEvent} e
  */
 function addOnClick(e) {
-  /** @type {HTMLElement} **/ 
+  /** @type {HTMLElement} **/
   const target = e.target;
-  const td = target.closest('td');
+  const td = target.closest("td");
   if (!td) return;
 
   const [x, y] = getXY(td);
@@ -470,15 +487,15 @@ function addOnClick(e) {
 }
 
 async function publishPuzzle() {
-  const darkString = darks.map((row, y) => row.map((b, x) => 
-      b ? '@' : circles[y][x] ? 'O' : '.'
-    ).join('')).join('_');
-  const across = $('aclues').value.replace(/\n+/g, '\n');
-  const down = $('dclues').value.replace(/\n+/g, '\n');
+  const darkString = darks
+    .map((row, y) => row.map((b, x) => (b ? "@" : circles[y][x] ? "O" : ".")).join(""))
+    .join("_");
+  const across = $("aclues").value.replace(/\n+/g, "\n");
+  const down = $("dclues").value.replace(/\n+/g, "\n");
 
   const ref = await db.collection("puzzles").add({
-    darkString, 
-    across, 
+    darkString,
+    across,
     down,
   });
 
@@ -486,43 +503,46 @@ async function publishPuzzle() {
 }
 
 /**
- * @param {HTMLTextAreaElement} textArea 
+ * @param {HTMLTextAreaElement} textArea
  */
 function validateClues(textArea) {
-  const formattedValue = (textArea.value || '')
-    .replace(/\n+/g, '\n')
-    .replace(/\n(?!\d+ )/g, ' ')
-    .replace(/\n/g, '\n\n');
+  const formattedValue = (textArea.value || "")
+    .replace(/\n+/g, "\n")
+    .replace(/\n(?!\d+ )/g, " ")
+    .replace(/\n/g, "\n\n");
 
   if (formattedValue != textArea.value) {
     textArea.value = formattedValue;
-    textArea.style.height = textArea.scrollHeight + 20 + 'px';
+    textArea.style.height = textArea.scrollHeight + 20 + "px";
   }
 
   const h3 = textArea.previousElementSibling;
-  h3.innerText = h3.innerText.split(' ')[0];
-  
+  h3.innerText = h3.innerText.split(" ")[0];
+
   if (!textArea.value) {
-    h3.style.background = 'orange';
+    h3.style.background = "orange";
     h3.innerText += ` missing!`;
     return;
   }
 
-  h3.style.background = 'red';
+  h3.style.background = "red";
 
-  let dx = 0, dy = 0;
-  if (textArea.id == 'aclues') dx = 1;
+  let dx = 0,
+    dy = 0;
+  if (textArea.id == "aclues") dx = 1;
   else dy = 1;
 
   const expected = new Set();
   for (let y = 0; y < darks.length; ++y)
-  for (let x = 0; x < darks[0].length; ++x) {
-    const [s1, s2] = [...getTD(x, y).childNodes].filter(e => e.tagName == "SPAN");
-    if (!s1) continue;
-    if (s2) { console.warn('multiple child span? ignoring!'); }
-    const n = s1.innerText;
-    if (!writable(x - dx, y - dy)) expected.add(n);
-  }
+    for (let x = 0; x < darks[0].length; ++x) {
+      const [s1, s2] = [...getTD(x, y).childNodes].filter(e => e.tagName == "SPAN");
+      if (!s1) continue;
+      if (s2) {
+        console.warn("multiple child span? ignoring!");
+      }
+      const n = s1.innerText;
+      if (!writable(x - dx, y - dy)) expected.add(n);
+    }
 
   const clues = parseClues(textArea.value);
   let prev = -1;
@@ -546,11 +566,11 @@ function validateClues(textArea) {
     prev = +n;
   }
   if (expected.size) {
-    h3.innerText += ` clues '${[...expected].join(' ')}' not present`;
+    h3.innerText += ` clues '${[...expected].join(" ")}' not present`;
     return;
   }
 
-  h3.style.background = 'green';
+  h3.style.background = "green";
 }
 
 function onUpload(e) {
@@ -567,57 +587,61 @@ function fromUpload(buffer) {
   const {grid, clues} = puz;
   const circleSet = new Set(puz.circles);
 
-  const w = grid[0].length, h = grid.length, wh = `${w} ${h}`;
-  $('w_h').value = wh;
-  
-  darks = grid.map(row => row.map(c => c == '.'));
+  const w = grid[0].length,
+    h = grid.length,
+    wh = `${w} ${h}`;
+  $("w_h").value = wh;
+
+  darks = grid.map(row => row.map(c => c == "."));
   circles = darks.map((row, y) => row.map((_, x) => circleSet.has(w * y + x)));
 
   drawCreateGrid(wh);
 
   for (const k in clues) {
-    const textArea = $(k[0] + 'clues'); // i.e. 'aclues'
-    textArea.value = clues[k].map((s, i) => i + ' ' + s).join('\n').trim();
+    const textArea = $(k[0] + "clues"); // i.e. 'aclues'
+    textArea.value = clues[k]
+      .map((s, i) => i + " " + s)
+      .join("\n")
+      .trim();
     validateClues(textArea);
   }
 }
 
-const clueIds = ['aclues', 'dclues'];
+const clueIds = ["aclues", "dclues"];
 async function createPuzzle() {
   darks = [[]];
   circles = [[]];
-  drawCreateGrid('3 2');
+  drawCreateGrid("3 2");
 
-  const upload = create(document.getElementsByTagName('h1')[0], 'input', {type: 'file'});
+  const upload = create(document.getElementsByTagName("h1")[0], "input", {type: "file"});
 
   upload.onchange = onUpload;
-  $('topleft').style.display = 'none';
+  $("topleft").style.display = "none";
 
-
-  const clue = $('clue');
-  clue.innerHTML = '';
-  const input = create(clue, 'input', {id: 'w_h'});
-  input.placeholder = 'W H';
+  const clue = $("clue");
+  clue.innerHTML = "";
+  const input = create(clue, "input", {id: "w_h"});
+  input.placeholder = "W H";
   input.oninput = () => drawCreateGrid(input.value);
 
-  const format = create($('clues'), 'button');
-  format.innerText = 'FORMAT';
+  const format = create($("clues"), "button");
+  format.innerText = "FORMAT";
   format.onclick = () => clueIds.forEach(c => validateClues($(c)));
 
   for (const cId of clueIds) {
     const parent = $(cId).parentElement;
     parent.removeChild($(cId));
-    const textArea = create(parent, 'textarea', {id: cId})
+    const textArea = create(parent, "textarea", {id: cId});
     textArea.oninput = () => validateClues(textArea);
   }
 
-  const button = create(clue, 'button');
-  button.innerText = 'GO';
+  const button = create(clue, "button");
+  button.innerText = "GO";
   button.onclick = publishPuzzle;
 }
 
 const urlParams = new URLSearchParams(window.location.search);
-const databaseId = urlParams.get('id');
+const databaseId = urlParams.get("id");
 if (databaseId) {
   play();
 } else {

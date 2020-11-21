@@ -1,42 +1,41 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>CrossWordy</title>
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
-  <link rel="stylesheet" href="style.css">
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <title>CrossWordy</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
-  <h1>CrossWordy</h1>
-  <div id="topleft">
-    <input id="rebus" type="checkbox" />
-    <label for="rebus">Rebus</label>
-  </div>
-  <a id="topright" href="https://github.com/darthwalsh/CrossWordy" target="_blank">
-    <img height="20" src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/github.svg" />
-  </a>
-  
-  <table id="grid">
-  </table>
-  <div id="clue">clue</div>
-
-  <div id="clues">
-    <div>
-      <h3>Across</h3>
-      <div id="aclues"></div>
+  <body>
+    <h1>CrossWordy</h1>
+    <div id="topleft">
+      <input id="rebus" type="checkbox" />
+      <label for="rebus">Rebus</label>
     </div>
-    <div>
-      <h3>Down</h3>
-      <div id="dclues"></div>
+    <a id="topright" href="https://github.com/darthwalsh/CrossWordy" target="_blank">
+      <img height="20" src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/github.svg" />
+    </a>
+
+    <table id="grid"></table>
+    <div id="clue">clue</div>
+
+    <div id="clues">
+      <div>
+        <h3>Across</h3>
+        <div id="aclues"></div>
+      </div>
+      <div>
+        <h3>Down</h3>
+        <div id="dclues"></div>
+      </div>
     </div>
-  </div>
 
-  <div id='measurer'></div>
+    <div id="measurer"></div>
 
-  <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-firestore.js"></script>
-  <script src="https://unpkg.com/puzjs@1.0.2/src/puz.js"></script>
-  <script src="main.js"></script>
-</body>
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-firestore.js"></script>
+    <script src="https://unpkg.com/puzjs@1.0.2/src/puz.js"></script>
+    <script src="main.js"></script>
+  </body>
 </html>
