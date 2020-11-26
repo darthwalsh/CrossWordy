@@ -25,12 +25,7 @@ function create(parent, name, attributes = {}) {
   return node;
 }
 
-/**
- *
- * @param {number} x
- * @param {number} y
- * @returns {HTMLElement}
- */
+/** @returns {HTMLTableDataCellElement} */
 function getTD(x, y) {
   return document.querySelectorAll(`tbody tr:nth-child(${y + 1}) td:nth-child(${x + 1})`)[0];
 }
@@ -43,25 +38,34 @@ function writable(x, y) {
   return inBounds(x, y) && !darks[y][x];
 }
 
-function getDXY(vert=vertical) {
+function getDXY(vert = vertical) {
   return vert ? [0, 1] : [1, 0];
 }
 
+/** @returns {[number, number]} */
 function getXY(td) {
   return [td.cellIndex, td.parentElement.rowIndex];
 }
 
-function* getRowCol(x, y, vert=vertical) {
+/** @returns {Generator<[number, number], undefined, any>} */
+function* getRowCol(x, y, vert = vertical) {
   const [dx, dy] = getDXY(vert);
 
   for (; writable(x - dx, y - dy); x -= dx, y -= dy) {}
   for (; writable(x, y); x += dx, y += dy) yield [x, y];
 }
 
+/** @returns {string} */
+function getClueNum(x, y, vert = vertical) {
+  const it = getRowCol(x, y, vert);
+  const first = it.next().value;
+  return getTD(...first).firstElementChild.nextElementSibling.innerText;
+}
+
 let focus = [0, 0];
 function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   if (focus) {
-    [...getRowCol(...focus)].forEach(xy => (getTD(...xy).classList.remove("sameWord")));
+    [...getRowCol(...focus)].forEach(xy => getTD(...xy).classList.remove("sameWord"));
     getTD(...focus).classList.remove("focused");
   }
 
@@ -74,14 +78,14 @@ function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   focus = [x, y];
   vertical = newVertical;
   const rowCol = [...getRowCol(...focus)];
-  rowCol.forEach(xy => (getTD(...xy).classList.add("sameWord")));
+  rowCol.forEach(xy => getTD(...xy).classList.add("sameWord"));
 
   const td = getTD(...focus);
   td.classList.add("focused");
   td.firstElementChild.select();
 
   const clue = $("clue");
-  const clueNum = getTD(...rowCol[0]).firstElementChild.nextElementSibling.innerText;
+  const clueNum = getClueNum(...focus, vertical);
   clue.innerText = (vertical ? dClues : aClues).get(clueNum) || "flip";
 
   const scale = n => {
@@ -164,6 +168,7 @@ function drawFromDB() {
 
   $("rebus").oninput = () => updateFocus(...focus, vertical);
   $("share").onclick = () => sharesDoc.update({focus, vertical});
+  $("hideClues").onclick = hideCluesOnClick;
 }
 
 /**
@@ -181,9 +186,26 @@ function drawClues(parent, clues, map) {
   }
 }
 
-/**
- * @returns string
- */
+/** @type {HTMLStyleElement} */
+const hideCluesCSS = create(document.head, "style");
+function hideCluesOnClick() {
+  cluesHidden = !cluesHidden;
+
+  /** @type {HTMLImageElement} **/
+  const hideClues = $("hideClues");
+  hideClues.src = cluesHidden ? "img/eye-close-up.svg" : "img/closed-eye.svg";
+  hideClues.title = cluesHidden ? "Show clues" : "Hide clues";
+
+  if (cluesHidden) {
+    hideCluesCSS.sheet.insertRule(".wordDone { display: none }");
+  } else {
+    while (hideCluesCSS.sheet.cssRules.length) {
+      hideCluesCSS.sheet.deleteRule(0);
+    }
+  }
+}
+
+/** @returns {string} */
 function cellValue(x, y) {
   if (darks[y][x]) return null;
   const input = getTD(x, y).firstElementChild;
@@ -208,6 +230,19 @@ function updateCellPresentation(input) {
   } else {
     const ratio = Math.min(1, 15 / measureText(value));
     input.style.setProperty("--font-scale", ratio);
+  }
+
+  const xy = getXY(input.closest("td"));
+  for (const v of [true, false]) {
+    const clueDomMap = v ? dClueDOM : aClueDOM;
+    const clueDom = clueDomMap.get(getClueNum(...xy, v));
+
+    const cells = [...getRowCol(...xy, v)];
+    if (cells.every(xy => cellValue(...xy))) {
+      clueDom.classList.add("wordDone");
+    } else {
+      clueDom.classList.remove("wordDone");
+    }
   }
 }
 
@@ -343,6 +378,8 @@ let aClueDOM = new Map(),
   dClueDOM = new Map();
 let puzzleDoc, cellsDoc, sharesDoc;
 
+let cluesHidden = false;
+
 function updateChars(snapshot) {
   if (snapshot.metadata.hasPendingWrites) return;
 
@@ -365,8 +402,8 @@ function updateShares(snapshot) {
   const {focus, vertical} = snapshot.data();
   const cells = [...getRowCol(...focus, vertical)];
 
-  cells.forEach(xy => getTD(...xy).classList.add('shared'));
-  setTimeout(() => cells.forEach(xy => getTD(...xy).classList.remove('shared')), 3000)
+  cells.forEach(xy => getTD(...xy).classList.add("shared"));
+  setTimeout(() => cells.forEach(xy => getTD(...xy).classList.remove("shared")), 3000);
 }
 
 function parseClues(s) {

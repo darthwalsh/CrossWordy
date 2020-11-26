@@ -162,10 +162,7 @@ td > input {
   list-style-position: inside;
 }
 
-/* TODO update this from JS on each letter change it clue is done
-Also click the clue to get to the word? 
-Check Github bug */
-.finished {
+.wordDone {
   color: grey;
 }
 
@@ -182,6 +179,12 @@ Check Github bug */
 #clues button {
   position: absolute;
   left: 40vw;
+}
+
+#hideClues {
+  position: absolute;
+  right: 0;
+  height: 4vw;
 }
 
 #measurer {
