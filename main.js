@@ -43,16 +43,16 @@ function writable(x, y) {
   return inBounds(x, y) && !darks[y][x];
 }
 
-function getDXY() {
-  return vertical ? [0, 1] : [1, 0];
+function getDXY(vert=vertical) {
+  return vert ? [0, 1] : [1, 0];
 }
 
 function getXY(td) {
   return [td.cellIndex, td.parentElement.rowIndex];
 }
 
-function* getRowCol(x, y) {
-  const [dx, dy] = getDXY();
+function* getRowCol(x, y, vert=vertical) {
+  const [dx, dy] = getDXY(vert);
 
   for (; writable(x - dx, y - dy); x -= dx, y -= dy) {}
   for (; writable(x, y); x += dx, y += dy) yield [x, y];
@@ -61,8 +61,8 @@ function* getRowCol(x, y) {
 let focus = [0, 0];
 function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   if (focus) {
-    [...getRowCol(...focus)].forEach(xy => (getTD(...xy).style.background = ""));
-    getTD(...focus).style.background = "";
+    [...getRowCol(...focus)].forEach(xy => (getTD(...xy).classList.remove("sameWord")));
+    getTD(...focus).classList.remove("focused");
   }
 
   if (noRebus) {
@@ -74,10 +74,10 @@ function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   focus = [x, y];
   vertical = newVertical;
   const rowCol = [...getRowCol(...focus)];
-  rowCol.forEach(xy => (getTD(...xy).style.background = "#A4ABFF"));
+  rowCol.forEach(xy => (getTD(...xy).classList.add("sameWord")));
 
   const td = getTD(...focus);
-  td.style.background = "yellow";
+  td.classList.add("focused");
   td.firstElementChild.select();
 
   const clue = $("clue");
@@ -163,6 +163,7 @@ function drawFromDB() {
   table.onkeyup = onKeyup;
 
   $("rebus").oninput = () => updateFocus(...focus, vertical);
+  $("share").onclick = () => sharesDoc.update({focus, vertical});
 }
 
 /**
@@ -242,7 +243,7 @@ function onInput(e) {
   const td = input.closest("td");
 
   let [x, y] = getXY(td);
-  doc.update({[`${x}_${y}`]: input.value});
+  cellsDoc.update({[`${x}_${y}`]: input.value});
 
   updateCellPresentation(input);
   if (isRebus()) return;
@@ -295,7 +296,7 @@ function onKeydown(e) {
 
   if (del) {
     input.value = "";
-    doc.update({[getXY(td).join("_")]: input.value});
+    cellsDoc.update({[getXY(td).join("_")]: input.value});
     updateCellPresentation(input);
   }
   if (steps) {
@@ -340,12 +341,12 @@ let aClues = new Map(),
   dClues = new Map();
 let aClueDOM = new Map(),
   dClueDOM = new Map();
-let doc;
+let puzzleDoc, cellsDoc, sharesDoc;
 
-function updateChars(doc) {
-  if (doc.metadata.hasPendingWrites) return;
+function updateChars(snapshot) {
+  if (snapshot.metadata.hasPendingWrites) return;
 
-  const data = doc.data();
+  const data = snapshot.data();
   for (const key in data) {
     if (!/\d+_\d+/.test(key)) continue;
     const [x, y] = key.split("_").map(Number);
@@ -353,6 +354,19 @@ function updateChars(doc) {
     input.value = data[key];
     updateCellPresentation(input);
   }
+}
+
+let firstShare = true;
+function updateShares(snapshot) {
+  if (firstShare) {
+    firstShare = false;
+    return;
+  }
+  const {focus, vertical} = snapshot.data();
+  const cells = [...getRowCol(...focus, vertical)];
+
+  cells.forEach(xy => getTD(...xy).classList.add('shared'));
+  setTimeout(() => cells.forEach(xy => getTD(...xy).classList.remove('shared')), 3000)
 }
 
 function parseClues(s) {
@@ -365,8 +379,8 @@ function parseClues(s) {
 }
 
 async function play() {
-  doc = db.collection("puzzles").doc(databaseId);
-  const darksReq = await doc.get();
+  puzzleDoc = db.collection("puzzles").doc(databaseId);
+  const darksReq = await puzzleDoc.get();
   const {darkString, across = "", down = "", title = ""} = darksReq.data();
   darks = darkString
     .trim()
@@ -396,7 +410,11 @@ async function play() {
     updateFocus(...focus, !vertical);
   };
 
-  doc.onSnapshot(updateChars);
+  cellsDoc = puzzleDoc.collection("live").doc("cells");
+  cellsDoc.onSnapshot(updateChars);
+
+  sharesDoc = puzzleDoc.collection("live").doc("shares");
+  sharesDoc.onSnapshot(updateShares);
 }
 
 function drawCreateGrid(size) {
@@ -508,6 +526,9 @@ async function publishPuzzle() {
     down,
     title,
   });
+
+  await ref.collection("live").doc("shares").set({});
+  await ref.collection("live").doc("cells").set({});
 
   window.location = `?id=${ref.id}`;
 }
@@ -628,7 +649,7 @@ const clueIds = ["aclues", "dclues"];
 async function createPuzzle() {
   darks = [[]];
   circles = [[]];
-  drawCreateGrid("3 2");
+  drawCreateGrid("8 2");
 
   const upload = create(document.getElementsByTagName("h1")[0], "input", {
     type: "file",
@@ -655,7 +676,7 @@ async function createPuzzle() {
     textArea.oninput = () => validateClues(textArea);
   }
 
-  const button = create(clue, "button");
+  const button = create($("cluebar"), "button", {id: "goButton"});
   button.innerText = "GO";
   button.onclick = publishPuzzle;
 

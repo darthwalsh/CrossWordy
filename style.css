@@ -1,5 +1,5 @@
 :root {
-  --grid-width: 3;
+  --grid-width: 8;
 }
 
 body {
@@ -88,15 +88,37 @@ td > input {
   height: 100%;
 }
 
+.sameWord {
+  background-color: #A4ABFF;
+}
+
+.shared {
+  background-color: yellowgreen;
+}
+
+.focused {
+  background-color: yellow;
+}
+
 .dark {
   background-color: gray;
+}
+
+#cluebar {
+  display: flex;
+  align-items: center;
+  background-color: #a4abff;
+  height: calc(100vw / var(--grid-width));
+}
+
+#share {
+  height: 100%;
+  cursor: pointer;
 }
 
 #clue {
   width: 98vw;
   text-align: center;
-  background-color: #a4abff;
-  height: calc(100vw / var(--grid-width));
   font-size: calc(var(--font-scale, 1) * 80vw / var(--grid-width));
   margin-top: 2px;
   padding-left: 1vw;
@@ -110,11 +132,11 @@ td > input {
   width: 57vw;
 }
 
-#clue > button {
+#goButton {
   background-color: yellow;
   padding: 0;
   font-size: calc(40vw / var(--grid-width));
-  width: 39vw;
+  width: calc(100vw / var(--grid-width));
   height: 100%;
   float: right;
 }
