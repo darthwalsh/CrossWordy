@@ -88,9 +88,10 @@ function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   const clueNum = getClueNum(...focus, vertical);
   clue.innerText = (vertical ? dClues : aClues).get(clueNum) || "flip";
 
+  const cluebar = $("cluebar");
   const scale = n => {
     clue.style.setProperty("--font-scale", n);
-    return clue.scrollHeight <= clue.clientHeight;
+    return clue.scrollHeight <= cluebar.clientHeight;
   };
   const ratio = binarySet(1, 0.1, scale); // precision / perf tradeoff
   scale(ratio);
