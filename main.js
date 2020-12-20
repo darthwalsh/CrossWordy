@@ -169,7 +169,7 @@ function drawFromDB() {
 
   $("rebus").oninput = () => updateFocus(...focus, vertical);
   $("share").onclick = () => {
-    sharesDoc.update({focus, vertical});
+    sharesDoc.update({focus, vertical, bustCache: Date.now()});
     updateFocus(...focus, vertical);
   };
   $("hideClues").onclick = hideCluesOnClick;
