@@ -168,7 +168,10 @@ function drawFromDB() {
   table.onkeyup = onKeyup;
 
   $("rebus").oninput = () => updateFocus(...focus, vertical);
-  $("share").onclick = () => sharesDoc.update({focus, vertical});
+  $("share").onclick = () => {
+    sharesDoc.update({focus, vertical});
+    updateFocus(...focus, vertical);
+  };
   $("hideClues").onclick = hideCluesOnClick;
 }
 
