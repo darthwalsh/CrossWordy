@@ -155,6 +155,7 @@ function drawFromDB() {
           f = [x, y];
         }
         span.innerText = ++i;
+        clueNumLocs.set(i, [x, y]);
       }
     }
   }
@@ -181,14 +182,27 @@ function drawFromDB() {
  * @param {HTMLElement} parent
  * @param {Map<string, string>} clues
  * @param {Map<string, HTMLLIElement} map
+ * @param {boolean} v
  */
-function drawClues(parent, clues, map) {
+function drawClues(parent, clues, map, v) {
   const ol = create(parent, "ol");
   for (const [n, text] of clues.entries()) {
     const li = create(ol, "li", {value: +n});
     li.innerText = text;
     map.set(n, li);
   }
+  ol.onclick = e => {
+    if(window.getSelection().toString()) return;
+
+    /** @type {HTMLLIElement} */
+    const target = e.target;
+    if (target.parentElement !== ol) return;
+
+    const loc = clueNumLocs.get(target.value);
+    if (!loc) return;
+    const [x, y] = loc;
+    updateFocus(x, y, v);
+  };
 }
 
 /** @type {HTMLStyleElement} */
@@ -377,10 +391,16 @@ function onKeyup(e) {
 let vertical = false;
 /** @type {boolean[][]} */
 let darks, circles;
-let aClues = new Map(),
-  dClues = new Map();
-let aClueDOM = new Map(),
-  dClueDOM = new Map();
+/** @type {Map<string, string>} */
+let aClues = new Map();
+/** @type {Map<string, string>} */
+let dClues = new Map();
+/** @type {Map<string, HTMLLIElement} */
+let aClueDOM = new Map();
+/** @type {Map<string, HTMLLIElement} */
+let dClueDOM = new Map();
+/** @type {Map<number, [number, number]} */
+let clueNumLocs = new Map();
 let puzzleDoc, cellsDoc, sharesDoc;
 
 let cluesHidden = false;
@@ -436,8 +456,8 @@ async function play() {
   if (across) {
     aClues = parseClues(across);
     dClues = parseClues(down);
-    drawClues($("aclues"), aClues, aClueDOM);
-    drawClues($("dclues"), dClues, dClueDOM);
+    drawClues($("aclues"), aClues, aClueDOM, false);
+    drawClues($("dclues"), dClues, dClueDOM, true);
   } else {
     $("clues").innerHTML = "";
   }
@@ -449,6 +469,7 @@ async function play() {
   drawFromDB();
 
   $("clue").onclick = () => {
+    if(window.getSelection().toString()) return;
     updateFocus(...focus, !vertical);
   };
 
