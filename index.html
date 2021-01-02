@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -8,39 +8,43 @@
   </head>
 
   <body>
-    <header>
-      <div id="topleft">
-        <input id="rebus" type="checkbox" />
-        <label for="rebus">Rebus</label>
+    <div id="bodyLeft">
+      <table id="grid"></table>
+      <div id="cluebar">
+        <img id="share" height="20" src="img/share.svg" title="Share clue" />
+        <!-- Icons made by https://www.flaticon.com/authors/pixel-perfect -->
+        <div id="clue">clue</div>
       </div>
-      <h1 id="title">CrossWordy</h1>
-      <a id="topright" href="https://github.com/darthwalsh/CrossWordy" target="_blank">
-        <img
-          height="20"
-          src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/github.svg"
-          title="CrossWordy by darthwalsh at GitHub"
-        />
-      </a>
-    </header>
-
-    <table id="grid"></table>
-    <div id="cluebar">
-      <img id="share" height="20" src="img/share.svg" title="Share clue" />
-      <!-- Icons made by https://www.flaticon.com/authors/pixel-perfect -->
-      <div id="clue">clue</div>
     </div>
 
-    <div id="clues">
-      <div>
-        <h3>Across</h3>
-        <div id="aclues"></div>
+    <div id="bodyRight">
+      <header>
+        <div id="topleft">
+          <input id="rebus" type="checkbox" />
+          <label for="rebus">Rebus</label>
+        </div>
+        <h1 id="title">CrossWordy</h1>
+        <img id="hideClues" height="20" src="img/closed-eye.svg" title="Hide clues" />
+        <!-- Icons made by https://www.flaticon.com/authors/freepik -->
+        <a id="topright" href="https://github.com/darthwalsh/CrossWordy" target="_blank">
+          <img
+            height="20"
+            src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/github.svg"
+            title="CrossWordy by darthwalsh at GitHub"
+          />
+        </a>
+      </header>
+
+      <div id="clues">
+        <div>
+          <h3>Across</h3>
+          <div id="aclues"></div>
+        </div>
+        <div>
+          <h3>Down</h3>
+          <div id="dclues"></div>
+        </div>
       </div>
-      <div>
-        <h3>Down</h3>
-        <div id="dclues"></div>
-      </div>
-      <img id="hideClues" height="20" src="img/closed-eye.svg" title="Hide clues" />
-      <!-- Icons made by https://www.flaticon.com/authors/freepik -->
     </div>
 
     <div id="measurer"></div>

@@ -5,7 +5,16 @@
 body {
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   margin: 0;
-  overflow-x: hidden;
+  overflow: hidden;
+
+  display: flex;
+}
+
+#bodyLeft {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: calc(100vh * (1 - 1 / var(--grid-width)));
 }
 
 header {
@@ -16,59 +25,50 @@ header {
 h1 {
   flex-grow: 1;
   text-align: center;
-  margin: 0 1vw;
-  font-size: 6vw;
+  margin: 0 1vh;
+  font-size: 4vh;
 }
 
 #topleft {
   flex-shrink: 0;
-  font-size: 4vw;
+  font-size: 3vh;
 }
 
 #topleft input[type="checkbox"] {
-  width: 3vw;
-  height: 3vw;
+  width: 2vh;
+  height: 2vh;
   margin-right: 0;
+  font-size: 4vh;
 }
 
-#topleft label {
-  margin-left: -1vw;
+header img {
+  top: 0.5vh;
+  right: 0.5vh;
+  height: 4vh;
 }
-
-#topright > img {
-  top: 0.5vw;
-  right: 0.5vw;
-  height: 8vw;
-}
-
 table {
-  width: 100%;
+  height: calc(100vh * (1 - 1 / var(--grid-width)));
   border-collapse: collapse;
 }
 
 td {
   border: 1px solid black;
-  padding: 0;
   position: relative;
-}
-td:after {
-  content: "";
-  display: block;
-  margin-top: 100%;
 }
 
 td > span {
   position: absolute;
-  font-size: calc(30vw / var(--grid-width));
+  left: 0;
+  top: 0;
+  font-size: calc(30vh / var(--grid-width));
   background: white;
 }
 
 td > input {
-  position: absolute;
   width: 100%;
-  margin-top: calc((30vw + 25vw * (1 - var(--font-scale, 1))) / var(--grid-width));
+  margin-top: calc((30vh + 25vh * (1 - var(--font-scale, 1))) / var(--grid-width));
   text-align: center;
-  font-size: calc(var(--font-scale, 1) * 50vw / var(--grid-width));
+  font-size: calc(var(--font-scale, 1) * 50vh / var(--grid-width));
   text-transform: uppercase;
 
   background: transparent;
@@ -89,7 +89,7 @@ td > input {
 }
 
 .sameWord {
-  background-color: #A4ABFF;
+  background-color: #a4abff;
 }
 
 .shared {
@@ -108,7 +108,7 @@ td > input {
   display: flex;
   align-items: center;
   background-color: #a4abff;
-  height: calc(100vw / var(--grid-width));
+  height: calc(100vh / var(--grid-width));
 }
 
 #share {
@@ -117,43 +117,52 @@ td > input {
 }
 
 #clue {
-  width: 98vw;
+  width: 98vh;
   text-align: center;
-  font-size: calc(var(--font-scale, 1) * 80vw / var(--grid-width));
+  font-size: calc(var(--font-scale, 1) * 80vh / var(--grid-width));
   margin-top: 2px;
-  padding-left: 1vw;
-  padding-right: 1vw;
+  padding-left: 1vh;
+  padding-right: 1vh;
 }
 
 #clue > input {
   border: 0;
   background-color: #a4abff;
-  font-size: calc(80vw / var(--grid-width));
-  width: 57vw;
+  font-size: calc(80vh / var(--grid-width));
+  width: 57vh;
 }
 
 #goButton {
   background-color: yellow;
   padding: 0;
-  font-size: calc(40vw / var(--grid-width));
-  width: calc(100vw / var(--grid-width));
+  font-size: calc(40vh / var(--grid-width));
+  width: calc(100vh / var(--grid-width));
   height: 100%;
   float: right;
+}
+
+#bodyRight {
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 #clues {
   display: grid;
   grid-template-columns: 1fr 1fr;
 
-  font-size: 2vw;
+  width: calc(100vw - 100vh * (1 - 1 / var(--grid-width)));
+
+  font-size: 2vh;
   font-family: Arial, sans-serif;
-  margin-left: 0.5vw;
-  margin-right: 0.5vw;
+  margin-left: 0.5vh;
+  margin-right: 0.5vh;
 }
 
 #clues h3 {
   margin: 0;
-  font-size: 6vw;
+  font-size: 2vh;
+  text-align: center;
 }
 
 #clues ol {
@@ -178,13 +187,7 @@ td > input {
 
 #clues button {
   position: absolute;
-  left: 40vw;
-}
-
-#hideClues {
-  position: absolute;
-  right: 0;
-  height: 4vw;
+  right: 2vh;
 }
 
 #measurer {
@@ -194,3 +197,8 @@ td > input {
   position: fixed;
   overflow: auto;
 }
+
+/* 
+  TODO
+  check how 3x8 and 8x3 nonsquare grids work maybe s/grid-width/grid-height/? 
+*/
