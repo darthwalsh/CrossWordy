@@ -160,6 +160,7 @@ function drawFromDB() {
   }
 
   document.documentElement.style.setProperty("--grid-width", darks[0].length);
+  document.documentElement.style.setProperty("--grid-height", darks.length);
   updateFocus(...f, false);
 
   table.onclick = onClick;
@@ -524,6 +525,7 @@ function drawCreateGrid(size) {
   clueIds.forEach(c => validateClues($(c)));
 
   document.documentElement.style.setProperty("--grid-width", darks[0].length);
+  document.documentElement.style.setProperty("--grid-height", darks.length);
   table.onclick = addOnClick;
 }
 
@@ -690,7 +692,7 @@ const clueIds = ["aclues", "dclues"];
 async function createPuzzle() {
   darks = [[]];
   circles = [[]];
-  drawCreateGrid("8 2");
+  drawCreateGrid("8 8");
 
   const upload = create(document.getElementsByTagName("h1")[0], "input", {
     type: "file",

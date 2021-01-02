@@ -1,4 +1,5 @@
 :root {
+  --grid-height: 8;
   --grid-width: 8;
 }
 
@@ -14,7 +15,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: calc(100vh * (1 - 1 / var(--grid-width)));
+  width: calc(100vh * var(--grid-width) / (var(--grid-height) + 1));
 }
 
 header {
@@ -47,7 +48,7 @@ header img {
   height: 4vh;
 }
 table {
-  height: calc(100vh * (1 - 1 / var(--grid-width)));
+  height: calc(100vh * (1 - 1 / var(--grid-height)));
   border-collapse: collapse;
 }
 
@@ -60,15 +61,15 @@ td > span {
   position: absolute;
   left: 0;
   top: 0;
-  font-size: calc(30vh / var(--grid-width));
+  font-size: calc(30vh / var(--grid-height));
   background: white;
 }
 
 td > input {
   width: 100%;
-  margin-top: calc((30vh + 25vh * (1 - var(--font-scale, 1))) / var(--grid-width));
+  margin-top: calc((30vh + 25vh * (1 - var(--font-scale, 1))) / var(--grid-height));
   text-align: center;
-  font-size: calc(var(--font-scale, 1) * 50vh / var(--grid-width));
+  font-size: calc(var(--font-scale, 1) * 50vh / var(--grid-height));
   text-transform: uppercase;
 
   background: transparent;
@@ -108,7 +109,7 @@ td > input {
   display: flex;
   align-items: center;
   background-color: #a4abff;
-  height: calc(100vh / var(--grid-width));
+  height: calc(min(100vh / var(--grid-height), 10vh));
 }
 
 #share {
@@ -119,7 +120,7 @@ td > input {
 #clue {
   width: 98vh;
   text-align: center;
-  font-size: calc(var(--font-scale, 1) * 80vh / var(--grid-width));
+  font-size: calc(var(--font-scale, 1) * 80vh / var(--grid-height));
   margin-top: 2px;
   padding-left: 1vh;
   padding-right: 1vh;
@@ -128,15 +129,15 @@ td > input {
 #clue > input {
   border: 0;
   background-color: #a4abff;
-  font-size: calc(80vh / var(--grid-width));
+  font-size: calc(min(80vh / var(--grid-height), 8vh));
   width: 57vh;
 }
 
 #goButton {
   background-color: yellow;
   padding: 0;
-  font-size: calc(40vh / var(--grid-width));
-  width: calc(100vh / var(--grid-width));
+  font-size: calc(40vh / var(--grid-height));
+  width: calc(100vh / var(--grid-height));
   height: 100%;
   float: right;
 }
@@ -151,7 +152,7 @@ td > input {
   display: grid;
   grid-template-columns: 1fr 1fr;
 
-  width: calc(100vw - 100vh * (1 - 1 / var(--grid-width)));
+  width: calc(100vw - 100vh * (1 - 1 / var(--grid-height)));
 
   font-size: 2vh;
   font-family: Arial, sans-serif;
@@ -197,8 +198,3 @@ td > input {
   position: fixed;
   overflow: auto;
 }
-
-/* 
-  TODO
-  check how 3x8 and 8x3 nonsquare grids work maybe s/grid-width/grid-height/? 
-*/
