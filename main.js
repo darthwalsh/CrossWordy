@@ -297,7 +297,7 @@ function onInput(e) {
   const td = input.closest("td");
 
   let [x, y] = getXY(td);
-  cellsDoc.update({[`${x}_${y}`]: input.value});
+  updateDbCell(input);
 
   updateCellPresentation(input);
   if (isRebus()) return;
@@ -328,8 +328,11 @@ const special = {
 };
 
 /**
- *
  * @param {KeyboardEvent} e
+ * 
+ * @description Semantics of del are a little complicated:
+ *  If the cell has text in it, the cell is cleared, then the cursor moves.
+ *  But if the cell is empty, the cursor first moves, then the cell is clear.
  */
 function onKeydown(e) {
   if (isRebus()) return;
@@ -348,10 +351,11 @@ function onKeydown(e) {
   if (!(e.key in special)) return;
   let {dx = 0, dy = 0, del = false, steps = 0} = special[e.key];
 
-  if (del) {
+  if (del && cellValue(x, y)) {
     input.value = "";
-    cellsDoc.update({[getXY(td).join("_")]: input.value});
+    updateDbCell(input);
     updateCellPresentation(input);
+    del = false;
   }
   if (steps) {
     [dx, dy] = getDXY();
@@ -370,6 +374,16 @@ function onKeydown(e) {
       updateFocus(x + dx, y + dy, vertical, {noRebus: true});
     }
   }
+
+  if (del) {
+    const nextTD = getTD(...focus);
+    const nextInput = nextTD.firstElementChild;
+
+    nextInput.value = "";
+    updateDbCell(nextInput);
+    updateCellPresentation(nextInput);
+  }
+
   return false;
 }
 
@@ -478,6 +492,13 @@ async function play() {
 
   sharesDoc = puzzleDoc.collection("live").doc("shares");
   sharesDoc.onSnapshot(updateShares);
+}
+
+/**
+ * @param {HTMLInputElement} input 
+ */
+function updateDbCell(input) {
+  cellsDoc.update({[getXY(input.closest("td")).join("_")]: input.value});
 }
 
 function drawCreateGrid(size) {
