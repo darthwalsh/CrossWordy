@@ -331,8 +331,8 @@ const special = {
  * @param {KeyboardEvent} e
  * 
  * @description Semantics of del are a little complicated:
- *  If the cell has text in it, the cell is cleared, then the cursor moves.
- *  But if the cell is empty, the cursor first moves, then the cell is clear.
+ *  If the cell has text in it, the cell is only cleared.
+ *  But if the cell is empty, the cursor first moves, then that cell is cleared.
  */
 function onKeydown(e) {
   if (isRebus()) return;
@@ -356,6 +356,7 @@ function onKeydown(e) {
     updateDbCell(input);
     updateCellPresentation(input);
     del = false;
+    steps = 0;
   }
   if (steps) {
     [dx, dy] = getDXY();
