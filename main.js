@@ -129,13 +129,12 @@ function isNum(i, row) {
 }
 
 function drawFromDB() {
-  const table = $("grid");
+  const tbody = $("grid");
 
   const cols = darks[0].map((_, x) => darks.map(row => row[x]));
   let i = 0,
     f;
 
-  const tbody = create(table, "tbody");
   for (const [y, row] of darks.entries()) {
     const tr = create(tbody, "tr");
     for (const [x, b] of row.entries()) {
@@ -164,10 +163,10 @@ function drawFromDB() {
   document.documentElement.style.setProperty("--grid-height", darks.length);
   updateFocus(...f, false);
 
-  table.onclick = onClick;
-  table.oninput = onInput;
-  table.onkeydown = onKeydown;
-  table.onkeyup = onKeyup;
+  tbody.onclick = onClick;
+  tbody.oninput = onInput;
+  tbody.onkeydown = onKeydown;
+  tbody.onkeyup = onKeyup;
 
   $("rebus").oninput = () => updateFocus(...focus, vertical);
   $("share").onclick = () => {
@@ -503,8 +502,8 @@ function updateDbCell(input) {
 }
 
 function drawCreateGrid(size) {
-  const table = $("grid");
-  table.innerHTML = "";
+  const tbody = $("grid");
+  tbody.innerHTML = "";
 
   if (!size) {
     size = `${darks[0].length} ${darks.length}`;
@@ -512,7 +511,7 @@ function drawCreateGrid(size) {
 
   let [ws, hs, a] = size.split(" ");
   if (a) {
-    const span = create(table, "span");
+    const span = create(tbody, "span");
     span.style.color = "darkred";
     span.innerText = '"W H" or "W" (e.g. "5 7")';
     return;
@@ -521,7 +520,7 @@ function drawCreateGrid(size) {
   if (!hs) hs = ws;
   const [w, h] = [ws, hs].map(Number);
   if (!w || !h) {
-    const span = create(table, "span");
+    const span = create(tbody, "span");
     span.style.color = "darkred";
     span.innerText = '"W H" or "W" (e.g. "5 7")';
     return;
@@ -545,7 +544,6 @@ function drawCreateGrid(size) {
   const cols = darks[0].map((_, x) => darks.map(row => row[x]));
   let i = 0;
 
-  const tbody = create(table, "tbody");
   for (const [y, row] of darks.entries()) {
     const tr = create(tbody, "tr");
     for (const [x, b] of row.entries()) {
@@ -569,7 +567,7 @@ function drawCreateGrid(size) {
 
   document.documentElement.style.setProperty("--grid-width", darks[0].length);
   document.documentElement.style.setProperty("--grid-height", darks.length);
-  table.onclick = addOnClick;
+  tbody.onclick = addOnClick;
 }
 
 /**

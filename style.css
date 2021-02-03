@@ -3,8 +3,11 @@
   --grid-width: 8;
 }
 
+* {
+ font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+}
+
 body {
-  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   margin: 0;
   overflow: hidden;
   display: flex;
@@ -47,13 +50,14 @@ header img {
   height: 4vh;
 }
 table {
-  height: calc(100vh * (1 - 1 / var(--grid-height)));
+  height: 100%;
   border-collapse: collapse;
 }
 
 td {
   border: 1px solid black;
   position: relative;
+  padding: 0;
 }
 
 td > span {
@@ -70,7 +74,6 @@ td > input {
   text-align: center;
   font-size: calc(var(--font-scale, 1) * 50vh / var(--grid-height));
   text-transform: uppercase;
-
   background: transparent;
   border: 0;
   padding: 0;
@@ -117,7 +120,7 @@ td > input {
 }
 
 #clue {
-  width: 98vh;
+  width: 100%;
   text-align: center;
   font-size: calc(var(--font-scale, 1) * 80vh / var(--grid-height));
   margin-top: 2px;

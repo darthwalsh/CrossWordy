@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -9,12 +9,20 @@
 
   <body>
     <div id="bodyLeft">
-      <table id="grid"></table>
-      <div id="cluebar">
-        <img id="share" height="20" src="img/share.svg" title="Share clue" />
-        <!-- Icons made by https://www.flaticon.com/authors/pixel-perfect -->
-        <div id="clue">clue</div>
-      </div>
+      <table>
+        <tbody id="grid"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="999">
+              <div id="cluebar">
+                <img id="share" height="20" src="img/share.svg" title="Share clue" />
+                <!-- Icons made by https://www.flaticon.com/authors/pixel-perfect -->
+                <div id="clue">clue</div>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
 
     <div id="bodyRight">
