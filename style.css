@@ -156,8 +156,7 @@ td > input {
 #clues {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(20vh, 1fr));
-  font-size: 2vh;
-  font-family: Arial, sans-serif;
+  font-size: 1.4em;
 }
 
 #clues h3 {
