@@ -45,11 +45,18 @@ h1 {
   font-size: 4vh;
 }
 
+#time {
+  display: none;
+  font-size: 3vh;
+  margin-right: 1vh;
+}
+
 header img {
   top: 0.5vh;
   right: 0.5vh;
   height: 4vh;
 }
+
 table {
   height: 100%;
   border-collapse: collapse;

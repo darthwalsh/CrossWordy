@@ -128,6 +128,7 @@ function isNum(i, row) {
   return true;
 }
 
+let cellInputCount = 0;
 function drawFromDB() {
   const tbody = $("grid");
 
@@ -135,6 +136,7 @@ function drawFromDB() {
   let i = 0,
     f;
 
+  cellInputCount = 0;
   for (const [y, row] of darks.entries()) {
     const tr = create(tbody, "tr");
     for (const [x, b] of row.entries()) {
@@ -143,6 +145,8 @@ function drawFromDB() {
       if (b) {
         td.classList.add("dark");
         input.style.display = "none";
+      } else {
+        ++cellInputCount;
       }
       if (circles[y][x]) {
         td.classList.add("circle");
@@ -263,6 +267,7 @@ function updateCellPresentation(input) {
   for (const v of [true, false]) {
     const clueDomMap = v ? dClueDOM : aClueDOM;
     const clueDom = clueDomMap.get(getClueNum(...xy, v));
+    if (!clueDom) continue;
 
     const cells = [...getRowCol(...xy, v)];
     if (cells.every(xy => cellValue(...xy))) {
@@ -428,10 +433,31 @@ let puzzleDoc, cellsDoc, sharesDoc;
 
 let cluesHidden = false;
 
+let startTime = -1;
 function updateChars(snapshot) {
+  const data = snapshot.data();
+
+  if (Object.keys(data).length == 0) {
+    startTime = -1;
+  } else if (startTime === -1) {
+    startTime = Date.now();
+  }
+
+  const filled = Object.values(data).filter(s=>s).length;
+  if (filled == cellInputCount) {
+    const diff = (Date.now() - startTime) / 1000;
+    const min = Math.floor(diff / 60);
+    const sec = Math.round(diff - 60 * min);
+
+    const time = $("time");
+    time.innerText = `${min}:${String(sec).padStart(2, '0')}`;
+    time.style.display = "initial";
+  } else {
+    time.style.display = "none";
+  }
+
   if (snapshot.metadata.hasPendingWrites) return;
 
-  const data = snapshot.data();
   for (const key in data) {
     if (!/\d+_\d+/.test(key)) continue;
     const [x, y] = key.split("_").map(Number);
