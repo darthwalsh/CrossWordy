@@ -169,12 +169,21 @@ function drawFromDB() {
   tbody.onkeyup = onKeyup;
 
   $("rebus").oninput = () => updateFocus(...focus, vertical);
-  $("share").onclick = () => {
-    sharesDoc.update({focus, vertical, bustCache: Date.now()});
-    updateFocus(...focus, vertical);
-  };
+  $("share").onclick = onShare;
   $("hideClues").onclick = hideCluesOnClick;
+
+  window.addEventListener('keydown', ev => {
+    if (ev.ctrlKey & ev.key === "s") {
+      ev.preventDefault();
+      onShare();
+    }
+  });
 }
+
+function onShare() {
+  sharesDoc.update({focus, vertical, bustCache: Date.now()});
+  updateFocus(...focus, vertical);
+};
 
 /**
  *
