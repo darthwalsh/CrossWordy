@@ -419,6 +419,8 @@ function onKeyup(e) {
 let vertical = false;
 /** @type {boolean[][]} */
 let darks, circles;
+/** @type {string[]} */
+let solution;
 /** @type {Map<string, string>} */
 let aClues = new Map();
 /** @type {Map<string, string>} */
@@ -492,7 +494,13 @@ function parseClues(s) {
 async function play() {
   puzzleDoc = db.collection("puzzles").doc(databaseId);
   const darksReq = await puzzleDoc.get();
-  const {darkString, across = "", down = "", title = ""} = darksReq.data();
+  const {
+    darkString,
+    across = "",
+    down = "",
+    title = "",
+    solutionRows = [],
+  } = darksReq.data();
   darks = darkString
     .trim()
     .split("_")
@@ -501,6 +509,8 @@ async function play() {
     .trim()
     .split("_")
     .map(row => row.split("").map(c => c == "O"));
+
+  solution = solutionRows
 
   if (across) {
     aClues = parseClues(across);
@@ -644,6 +654,7 @@ async function publishPuzzle() {
     across,
     down,
     title,
+    solutionRows: solution,
   });
 
   await ref.collection("live").doc("shares").set({});
@@ -748,6 +759,8 @@ function fromUpload(buffer) {
 
   darks = grid.map(row => row.map(c => c == "."));
   circles = darks.map((row, y) => row.map((_, x) => circleSet.has(w * y + x)));
+
+  solution = grid.map(row => row.map(c => c.solution || c).join('\t'));
 
   drawCreateGrid(wh);
 
