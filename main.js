@@ -176,8 +176,8 @@ function drawFromDB() {
   $("share").onclick = onShare;
   $("hideClues").onclick = hideCluesOnClick;
 
-  window.addEventListener('keydown', ev => {
-    if (ev.ctrlKey & ev.key === "s") {
+  window.addEventListener("keydown", ev => {
+    if (ev.ctrlKey & (ev.key === "s")) {
       ev.preventDefault();
       onShare();
     }
@@ -187,7 +187,7 @@ function drawFromDB() {
 function onShare() {
   sharesDoc.update({focus, vertical, bustCache: Date.now()});
   updateFocus(...focus, vertical);
-};
+}
 
 /**
  *
@@ -204,7 +204,7 @@ function drawClues(parent, clues, map, v) {
     map.set(n, li);
   }
   ol.onclick = e => {
-    if(window.getSelection().toString()) return;
+    if (window.getSelection().toString()) return;
 
     /** @type {HTMLLIElement} */
     const target = e.target;
@@ -342,7 +342,7 @@ const special = {
 
 /**
  * @param {KeyboardEvent} e
- * 
+ *
  * @description Semantics of del are a little complicated:
  *  If the cell has text in it, the cell is only cleared.
  *  But if the cell is empty, the cursor first moves, then that cell is cleared.
@@ -445,14 +445,14 @@ function updateChars(snapshot) {
     startTime = Date.now();
   }
 
-  const filled = Object.values(data).filter(s=>s).length;
+  const filled = Object.values(data).filter(s => s).length;
   if (filled == cellInputCount) {
     const diff = (Date.now() - startTime) / 1000;
     const min = Math.floor(diff / 60);
     const sec = Math.round(diff - 60 * min);
 
     const time = $("time");
-    time.innerText = `${min}:${String(sec).padStart(2, '0')}`;
+    time.innerText = `${min}:${String(sec).padStart(2, "0")}`;
     time.style.display = "initial";
   } else {
     time.style.display = "none";
@@ -494,13 +494,7 @@ function parseClues(s) {
 async function play() {
   puzzleDoc = db.collection("puzzles").doc(databaseId);
   const darksReq = await puzzleDoc.get();
-  const {
-    darkString,
-    across = "",
-    down = "",
-    title = "",
-    solutionRows = [],
-  } = darksReq.data();
+  const {darkString, across = "", down = "", title = "", solutionRows = []} = darksReq.data();
   darks = darkString
     .trim()
     .split("_")
@@ -510,7 +504,7 @@ async function play() {
     .split("_")
     .map(row => row.split("").map(c => c == "O"));
 
-  solution = solutionRows
+  solution = solutionRows;
 
   if (across) {
     aClues = parseClues(across);
@@ -528,7 +522,7 @@ async function play() {
   drawFromDB();
 
   $("clue").onclick = () => {
-    if(window.getSelection().toString()) return;
+    if (window.getSelection().toString()) return;
     updateFocus(...focus, !vertical);
   };
 
@@ -540,7 +534,7 @@ async function play() {
 }
 
 /**
- * @param {HTMLInputElement} input 
+ * @param {HTMLInputElement} input
  */
 function updateDbCell(input) {
   cellsDoc.update({[getXY(input.closest("td")).join("_")]: input.value});
@@ -760,7 +754,7 @@ function fromUpload(buffer) {
   darks = grid.map(row => row.map(c => c == "."));
   circles = darks.map((row, y) => row.map((_, x) => circleSet.has(w * y + x)));
 
-  solution = grid.map(row => row.map(c => c.solution || c).join('\t'));
+  solution = grid.map(row => row.map(c => c.solution || c).join("\t"));
 
   drawCreateGrid(wh);
 
