@@ -4,7 +4,7 @@
 }
 
 * {
- font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 body {
@@ -43,6 +43,15 @@ h1 {
   height: 2vh;
   margin-right: 0;
   font-size: 4vh;
+}
+
+.sol {
+  display: none;
+  cursor: pointer;
+  background-color: limegreen;
+  padding: 0;
+  font-size: 2vh;
+  margin: 0 0.2vh;
 }
 
 #time {
@@ -109,6 +118,14 @@ td > input {
 
 .focused {
   background-color: yellow;
+}
+
+.solCorrect {
+  background-color: limegreen;
+}
+
+.solWrong {
+  background-color: crimson;
 }
 
 .dark {

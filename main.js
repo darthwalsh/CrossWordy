@@ -182,11 +182,47 @@ function drawFromDB() {
       onShare();
     }
   });
+
+  $("sol-check").onmousedown = onCheck;
+  $("sol-check").onmouseup = doneWithCheck;
+
+  $("sol-whats-wrong").onmousedown = onWhatsWrong;
+  $("sol-whats-wrong").onmouseup = doneWithCheck;
 }
 
 function onShare() {
   sharesDoc.update({focus, vertical, bustCache: Date.now()});
   updateFocus(...focus, vertical);
+}
+
+function doneWithCheck() {
+  for (const [x, y] of allCellValues()) {
+    getTD(x, y).classList.remove("solWrong");
+    getTD(x, y).classList.remove("solCorrect");
+  }  
+}
+
+function onCheck() {
+  const name = [...incorrectCells()].length ? "solWrong" : "solCorrect";
+  for (const [x, y] of allCellValues()) {
+    getTD(x, y).classList.add(name);
+  }
+
+  $("sol-whats-wrong").style.display = "initial";
+}
+
+function onWhatsWrong() {
+  for (const [x, y] of incorrectCells()) {
+    getTD(x, y).classList.add("solWrong");
+  }
+}
+
+/** @returns {Generator<[number, number, string], undefined, any>} */
+function* incorrectCells() {
+  for (const cell of allCellValues()) {
+    const [x, y, c] = cell;
+    if (solution[y][x].toLocaleUpperCase() != c.toLocaleUpperCase()) yield cell;
+  }
 }
 
 /**
@@ -241,6 +277,17 @@ function cellValue(x, y) {
   if (darks[y][x]) return null;
   const input = getTD(x, y).firstElementChild;
   return input.value;
+}
+
+/** @returns {Generator<[number, number, string], undefined, any>} */
+function* allCellValues() {
+  for (let y = 0; y < darks.length; ++y)
+    for (let x = 0; x < darks[0].length; ++x) {
+      const s = cellValue(x, y);
+      if (s === null) continue;
+
+      yield [x, y, s];
+    }
 }
 
 function isRebus() {
@@ -419,7 +466,7 @@ function onKeyup(e) {
 let vertical = false;
 /** @type {boolean[][]} */
 let darks, circles;
-/** @type {string[]} */
+/** @type {string[][]} */
 let solution;
 /** @type {Map<string, string>} */
 let aClues = new Map();
@@ -454,6 +501,8 @@ function updateChars(snapshot) {
     const time = $("time");
     time.innerText = `${min}:${String(sec).padStart(2, "0")}`;
     time.style.display = "initial";
+
+    if (solution) $("sol-check").style.display = "initial";
   } else {
     time.style.display = "none";
   }
@@ -494,7 +543,7 @@ function parseClues(s) {
 async function play() {
   puzzleDoc = db.collection("puzzles").doc(databaseId);
   const darksReq = await puzzleDoc.get();
-  const {darkString, across = "", down = "", title = "", solutionRows = []} = darksReq.data();
+  const {darkString, across = "", down = "", title = "", solution: sol = ""} = darksReq.data();
   darks = darkString
     .trim()
     .split("_")
@@ -504,7 +553,7 @@ async function play() {
     .split("_")
     .map(row => row.split("").map(c => c == "O"));
 
-  solution = solutionRows;
+  solution = sol ? sol.split("\n").map(row => row.split("\t")) : null;
 
   if (across) {
     aClues = parseClues(across);
@@ -648,7 +697,7 @@ async function publishPuzzle() {
     across,
     down,
     title,
-    solutionRows: solution,
+    solution: solution.map(row => row.join("\t")).join("\n"),
   });
 
   await ref.collection("live").doc("shares").set({});
@@ -754,7 +803,7 @@ function fromUpload(buffer) {
   darks = grid.map(row => row.map(c => c == "."));
   circles = darks.map((row, y) => row.map((_, x) => circleSet.has(w * y + x)));
 
-  solution = grid.map(row => row.map(c => c.solution || c).join("\t"));
+  solution = grid.map(row => row.map(c => c.solution || c));
 
   drawCreateGrid(wh);
 
@@ -818,3 +867,13 @@ if (databaseId) {
 }
 
 // TODO add deletion timeout mechanism?
+
+/*
+Debugging snippet!
+
+for (const [x, y, c] of allCellValues()) {
+  var inp = getTD(x, y).firstElementChild;
+  inp.value = solution[y][x];
+  onInput({target: inp})
+}
+*/
