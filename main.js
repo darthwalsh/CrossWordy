@@ -727,12 +727,13 @@ async function publishPuzzle() {
     title = "";
   }
 
+  const solutionText = solution ? solution.map(row => row.join("\t")).join("\n") : '';
   const ref = await db.collection("puzzles").add({
     darkString,
     across,
     down,
     title,
-    solution: solution.map(row => row.join("\t")).join("\n"),
+    solution: solutionText,
   });
 
   await ref.collection("live").doc("shares").set({});
