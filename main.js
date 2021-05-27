@@ -111,14 +111,15 @@ function rewriteClueLinks(e) {
     
     const a = create(e, "a", {href: "#"});
     a.innerText = n + '-';
-    a.onclick = el => {
+    a.onclick = ev => {
       const loc = clueNumLocs.get(+n);
       if (loc) {
         const [x, y] = loc;
         updateFocus(x, y, dir.toLowerCase() === "down");
       }
 
-      el.preventDefault();
+      ev.preventDefault();
+      ev.stopPropagation();
     }
 
     text = text.slice(m.index + n.length + 1);
