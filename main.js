@@ -87,6 +87,7 @@ function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   const clue = $("clue");
   const clueNum = getClueNum(...focus, vertical);
   clue.innerText = (vertical ? dClues : aClues).get(clueNum) || "flip";
+  rewriteClueLinks(clue);
 
   const cluebar = $("cluebar");
   const scale = n => {
@@ -95,6 +96,40 @@ function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   };
   const ratio = binarySet(1, 0.1, scale); // precision / perf tradeoff
   scale(ratio);
+}
+
+/** @param {HTMLElement} e */
+function rewriteClueLinks(e) {
+  let text = e.innerText;
+  /** @type {RegExpExecArray} */
+  let m;
+  while (m = /(\d+)-(.*?)(Across|Down)/.exec(text)) {
+    const [_, n, extra, dir] = m;
+
+    e.removeChild(e.lastChild);
+    e.append(text.slice(0, m.index));
+    
+    const a = create(e, "a", {href: "#"});
+    a.innerText = n + '-';
+    a.onclick = ev => {
+      const loc = clueNumLocs.get(+n);
+      if (loc) {
+        const [x, y] = loc;
+        updateFocus(x, y, dir.toLowerCase() === "down");
+      }
+
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+
+    text = text.slice(m.index + n.length + 1);
+    if (!extra) {
+      a.innerText += dir;
+      text = text.slice(dir.length);
+    }
+
+    e.append(text);
+  }
 }
 
 /**
@@ -237,6 +272,7 @@ function drawClues(parent, clues, map, v) {
   for (const [n, text] of clues.entries()) {
     const li = create(ol, "li", {value: +n});
     li.innerText = text;
+    rewriteClueLinks(li);
     map.set(n, li);
   }
   ol.onclick = e => {
@@ -692,12 +728,13 @@ async function publishPuzzle() {
     title = "";
   }
 
+  const solutionText = solution ? solution.map(row => row.join("\t")).join("\n") : '';
   const ref = await db.collection("puzzles").add({
     darkString,
     across,
     down,
     title,
-    solution: solution.map(row => row.join("\t")).join("\n"),
+    solution: solutionText,
   });
 
   await ref.collection("live").doc("shares").set({});
