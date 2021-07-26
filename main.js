@@ -199,7 +199,7 @@ function doneWithCheck() {
   for (const [x, y] of allCellValues()) {
     getTD(x, y).classList.remove("solWrong");
     getTD(x, y).classList.remove("solCorrect");
-  }  
+  }
 }
 
 function onCheck() {
@@ -791,9 +791,13 @@ function fromUpload(buffer) {
   const {
     grid,
     clues,
-    meta: {title},
+    meta: {title, description},
   } = puz;
   const circleSet = new Set(puz.circles);
+
+  if (description) {
+    alert("WARNING! Include PDF!\n" + description);
+  }
 
   const w = grid[0].length,
     h = grid.length,
