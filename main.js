@@ -86,7 +86,7 @@ function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
 
   const clue = $("clue");
   const clueNum = getClueNum(...focus, vertical);
-  clue.innerText = (vertical ? dClues : aClues).get(clueNum) || "flip";
+  clue.innerText = (vertical ? dClues : aClues).get(clueNum) || "[flip]";
 
   const cluebar = $("cluebar");
   const scale = n => {
@@ -692,12 +692,13 @@ async function publishPuzzle() {
     title = "";
   }
 
+  const solutionText = solution ? solution.map(row => row.join("\t")).join("\n") : "";
   const ref = await db.collection("puzzles").add({
     darkString,
     across,
     down,
     title,
-    solution: solution.map(row => row.join("\t")).join("\n"),
+    solution: solutionText,
   });
 
   await ref.collection("live").doc("shares").set({});
