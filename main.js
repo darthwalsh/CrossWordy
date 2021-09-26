@@ -853,7 +853,7 @@ async function createPuzzle() {
     const parent = $(cId).parentElement;
     parent.removeChild($(cId));
     const textArea = create(parent, "textarea", {id: cId});
-    textArea.oninput = () => validateClues(textArea);
+    // Could be helpful to run validateClues() for the oninput event, but makes it impossible to type normally
   }
 
   const button = create($("cluebar"), "button", {id: "goButton"});
