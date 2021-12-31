@@ -483,6 +483,7 @@ let puzzleDoc, cellsDoc, sharesDoc;
 let cluesHidden = false;
 
 let startTime = -1;
+let oldData = {};
 function updateChars(snapshot) {
   const data = snapshot.data();
 
@@ -512,10 +513,22 @@ function updateChars(snapshot) {
   for (const key in data) {
     if (!/\d+_\d+/.test(key)) continue;
     const [x, y] = key.split("_").map(Number);
-    const input = getTD(x, y).firstElementChild;
+    const td = getTD(x, y);
+    const input = td.firstElementChild;
     input.value = data[key];
     updateCellPresentation(input);
+
+    if (oldData[key] !== data[key]) {
+      tempAddClass(td, "remoteChanged", 1000);
+    }
   }
+
+  oldData = data;
+}
+
+function tempAddClass(el, className, ms) {
+  el.classList.add(className);
+  setTimeout(() => el.classList.remove(className), ms);
 }
 
 let firstShare = true;
@@ -527,8 +540,7 @@ function updateShares(snapshot) {
   const {focus, vertical} = snapshot.data();
   const cells = [...getRowCol(...focus, vertical)];
 
-  cells.forEach(xy => getTD(...xy).classList.add("shared"));
-  setTimeout(() => cells.forEach(xy => getTD(...xy).classList.remove("shared")), 3000);
+  cells.forEach(xy => tempAddClass(getTD(...xy), "shared", 3000));
 }
 
 function parseClues(s) {

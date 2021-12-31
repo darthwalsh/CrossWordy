@@ -112,6 +112,10 @@ td > input {
   background-color: #a4abff;
 }
 
+.remoteChanged {
+  background-color: #ffa4e1;
+}
+
 .shared {
   background-color: yellowgreen;
 }
