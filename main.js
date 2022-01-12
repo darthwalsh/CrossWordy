@@ -508,7 +508,10 @@ function updateChars(snapshot) {
     time.style.display = "none";
   }
 
-  if (snapshot.metadata.hasPendingWrites) return;
+  if (snapshot.metadata.hasPendingWrites) {
+    oldData = data;
+    return;
+  }
 
   for (const key in data) {
     if (!/\d+_\d+/.test(key)) continue;
@@ -522,7 +525,6 @@ function updateChars(snapshot) {
       tempAddClass(td, "remoteChanged", 1000);
     }
   }
-
   oldData = data;
 }
 
