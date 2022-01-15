@@ -203,6 +203,10 @@ td > input {
   color: grey;
 }
 
+.wordDone a {
+  filter: brightness(60%);
+}
+
 #clues textarea {
   width: 100%;
   margin: 0;
