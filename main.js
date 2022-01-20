@@ -87,7 +87,15 @@ function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   const clue = $("clue");
   const clueNum = getClueNum(...focus, vertical);
   clue.innerText = (vertical ? dClues : aClues).get(clueNum) || "[flip]";
-  rewriteClueLinks(clue);
+  const linkedTo = rewriteClueLinks(clue);
+
+  for (const [x, y] of allCellValues()) {
+    getTD(x, y).classList.remove("linkedTo");
+  }
+  for (const [vert, clue] of linkedTo) {
+    const rowCol = [...getRowCol(...clueNumLocs.get(clue), vert)];
+    rowCol.forEach(xy => getTD(...xy).classList.add("linkedTo"));
+  }
 
   const cluebar = $("cluebar");
   const scale = n => {
@@ -98,19 +106,24 @@ function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   scale(ratio);
 }
 
-/** @param {HTMLElement} e */
+/**
+ * @param {HTMLElement} e
+ * @returns {[boolean, number]} any linked clues in [vertical, clueNum]
+ */
 function rewriteClueLinks(e) {
   let text = e.innerText;
+  const linkedTo = [];
+
   /** @type {RegExpExecArray} */
   let m;
-  while (m = /(\d+)-(.*?)(Across|Down)/.exec(text)) {
+  while ((m = /(\d+)-(.*?)(Across|Down)/.exec(text))) {
     const [_, n, extra, dir] = m;
 
     e.removeChild(e.lastChild);
     e.append(text.slice(0, m.index));
-    
+
     const a = create(e, "a", {href: "#"});
-    a.innerText = n + '-';
+    a.innerText = n + "-";
     a.onclick = ev => {
       const loc = clueNumLocs.get(+n);
       if (loc) {
@@ -120,7 +133,9 @@ function rewriteClueLinks(e) {
 
       ev.preventDefault();
       ev.stopPropagation();
-    }
+    };
+
+    linkedTo.push([dir.toLowerCase() === "down", +n]);
 
     text = text.slice(m.index + n.length + 1);
     if (!extra) {
@@ -130,6 +145,8 @@ function rewriteClueLinks(e) {
 
     e.append(text);
   }
+
+  return linkedTo;
 }
 
 /**

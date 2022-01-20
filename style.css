@@ -108,6 +108,10 @@ td > input {
   height: 100%;
 }
 
+.linkedTo {
+  background-color: #dec5ff;
+}
+
 .sameWord {
   background-color: #a4abff;
 }
