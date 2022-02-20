@@ -203,6 +203,9 @@ function drawFromDB() {
       if (circles[y][x]) {
         td.classList.add("circle");
       }
+      if (shaded[y][x]) {
+        td.classList.add("shaded");
+      }
 
       if (isNum(x, darks[y]) || isNum(y, cols[x])) {
         const span = create(td, "span");
@@ -518,7 +521,13 @@ function onKeyup(e) {
 
 let vertical = false;
 /** @type {boolean[][]} */
-let darks, circles;
+let darks;
+/** @type {boolean[][]} */
+let circles;
+/** @type {boolean[][]} */
+let shaded;
+// If we add another of these, consider turning this into an enum.
+
 /** @type {string[][]} */
 let solution;
 /** @type {Map<string, string>} */
@@ -611,14 +620,10 @@ async function play() {
   puzzleDoc = db.collection("puzzles").doc(databaseId);
   const darksReq = await puzzleDoc.get();
   const {darkString, across = "", down = "", title = "", solution: sol = ""} = darksReq.data();
-  darks = darkString
-    .trim()
-    .split("_")
-    .map(row => row.split("").map(c => c == "@"));
-  circles = darkString
-    .trim()
-    .split("_")
-    .map(row => row.split("").map(c => c == "O"));
+  const darkStringRows = darkString.trim().split("_");
+  darks = darkStringRows.map(row => row.split("").map(c => c == "@"));
+  circles = darkStringRows.map(row => row.split("").map(c => c == "O"));
+  shaded = darkStringRows.map(row => row.split("").map(c => c == "#"));
 
   solution = sol ? sol.split("\n").map(row => row.split("\t")) : null;
 
@@ -695,6 +700,13 @@ function drawCreateGrid(size) {
         .fill()
         .map((_, x) => Boolean(circles[y] && circles[y][x]))
     );
+  shaded = Array(h)
+    .fill()
+    .map((_, y) =>
+      Array(w)
+        .fill()
+        .map((_, x) => Boolean(shaded[y] && shaded[y][x]))
+    );
 
   const cols = darks[0].map((_, x) => darks.map(row => row[x]));
   let i = 0;
@@ -709,6 +721,9 @@ function drawCreateGrid(size) {
       }
       if (circles[y][x]) {
         td.classList.add("circle");
+      }
+      if (shaded[y][x]) {
+        td.classList.add("shaded");
       }
 
       if (isNum(x, darks[y]) || isNum(y, cols[x])) {
@@ -740,6 +755,9 @@ function addOnClick(e) {
     circles[y][x] = true;
   } else if (circles[y][x]) {
     circles[y][x] = false;
+    shaded[y][x] = true;
+  } else if (shaded[y][x]) {
+    shaded[y][x] = false;
   } else {
     darks[y][x] = true;
   }
@@ -749,7 +767,9 @@ function addOnClick(e) {
 
 async function publishPuzzle() {
   const darkString = darks
-    .map((row, y) => row.map((b, x) => (b ? "@" : circles[y][x] ? "O" : ".")).join(""))
+    .map((row, y) =>
+      row.map((b, x) => (b ? "@" : circles[y][x] ? "O" : shaded[y][x] ? "#" : ".")).join("")
+    )
     .join("_");
   const across = $("aclues").value.replace(/\n+/g, "\n");
   const down = $("dclues").value.replace(/\n+/g, "\n");
@@ -760,12 +780,16 @@ async function publishPuzzle() {
   }
 
   const solutionText = solution ? solution.map(row => row.join("\t")).join("\n") : "";
+
+  const creation = firebase.firestore.Timestamp.now();
+
   const ref = await db.collection("puzzles").add({
     darkString,
     across,
     down,
     title,
     solution: solutionText,
+    creation,
   });
 
   await ref.collection("live").doc("shares").set({});
@@ -862,6 +886,7 @@ function fromUpload(buffer) {
     meta: {title, description},
   } = puz;
   const circleSet = new Set(puz.circles);
+  const shadedSet = new Set(puz.shades);
 
   if (description) {
     alert("WARNING! Include PDF!\n" + description);
@@ -874,6 +899,7 @@ function fromUpload(buffer) {
 
   darks = grid.map(row => row.map(c => c == "."));
   circles = darks.map((row, y) => row.map((_, x) => circleSet.has(w * y + x)));
+  shaded = darks.map((row, y) => row.map((_, x) => shadedSet.has(w * y + x)));
 
   solution = grid.map(row => row.map(c => c.solution || c));
 
@@ -896,6 +922,7 @@ const clueIds = ["aclues", "dclues"];
 async function createPuzzle() {
   darks = [[]];
   circles = [[]];
+  shaded = [[]];
   drawCreateGrid("8 8");
 
   const upload = create(document.getElementsByTagName("h1")[0], "input", {
@@ -938,7 +965,7 @@ if (databaseId) {
   createPuzzle();
 }
 
-// TODO add deletion timeout mechanism?
+// TODO add deletion mechanism using puzzles/ID/creation, where default creation is 2020-02-20
 
 /*
 Debugging snippet!

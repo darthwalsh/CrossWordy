@@ -108,6 +108,11 @@ td > input {
   height: 100%;
 }
 
+.shaded {
+  background-color: white; /* required so brightness filter turns into lightgrey */
+  filter: brightness(83%);
+}
+
 .linkedTo {
   background-color: #ffd98e;
 }
@@ -137,7 +142,7 @@ td > input {
 }
 
 .dark {
-  background-color: gray;
+  background-color: #222; /* needs contrast to shaded */
 }
 
 #cluebar {
