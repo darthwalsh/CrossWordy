@@ -59,7 +59,7 @@ function* getRowCol(x, y, vert = vertical) {
 function getClueNum(x, y, vert = vertical) {
   const it = getRowCol(x, y, vert);
   const first = it.next().value;
-  return getTD(...first).firstElementChild.nextElementSibling.innerText;
+  return getTD(...first).firstElementChild?.nextElementSibling?.innerText;
 }
 
 let focus = [0, 0];
