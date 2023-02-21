@@ -80,6 +80,13 @@ function updateFocus(x, y, newVertical, {noRebus = false} = {}) {
   const rowCol = [...getRowCol(...focus)];
   rowCol.forEach(xy => getTD(...xy).classList.add("sameWord"));
 
+  [...dClueDOM.values(), ...aClueDOM.values()].forEach(e => e.classList.remove("sameWord"));
+  const clueDomMap = vertical ? dClueDOM : aClueDOM;
+  const clueDom = clueDomMap.get(getClueNum(...focus, vertical));
+  if (clueDom) {
+    clueDom.classList.add("sameWord");
+  }
+
   const td = getTD(...focus);
   td.classList.add("focused");
   td.firstElementChild.select();
@@ -356,7 +363,10 @@ function measureText(s) {
   return measurer.clientWidth;
 }
 
-/** @param {HTMLInputElement} input */
+/** 
+ * Called whenever the grid changes, i.e. when firebase updates a letter
+ * @param {HTMLInputElement} input 
+ */
 function updateCellPresentation(input) {
   const {value} = input;
   if (value.length <= 1) {
