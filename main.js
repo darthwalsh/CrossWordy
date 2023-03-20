@@ -628,8 +628,9 @@ function parseClues(s) {
 
 async function play() {
   puzzleDoc = db.collection("puzzles").doc(databaseId);
-  const darksReq = await puzzleDoc.get();
-  const {darkString, across = "", down = "", title = "", solution: sol = ""} = darksReq.data();
+  const dataReq = await puzzleDoc.get();
+  const data = dataReq.data();
+  const {darkString, across = "", down = "", title = "", solution: sol = ""} = data;
   const darkStringRows = darkString.trim().split("_");
   darks = darkStringRows.map(row => row.split("").map(c => c == "@"));
   circles = darkStringRows.map(row => row.split("").map(c => c == "O"));
@@ -789,6 +790,8 @@ async function publishPuzzle() {
     title = "";
   }
 
+  const crossWordyCreationMS = new Date().getTime();
+
   const solutionText = solution ? solution.map(row => row.join("\t")).join("\n") : "";
 
   const creation = firebase.firestore.Timestamp.now();
@@ -798,6 +801,7 @@ async function publishPuzzle() {
     across,
     down,
     title,
+    crossWordyCreationMS,
     solution: solutionText,
     creation,
   });
@@ -925,6 +929,7 @@ function fromUpload(buffer) {
   }
 
   const titleAfterYear = title.replace(/.*\d{4} */, "");
+  // TODO store the NYT publish date in the DB
   $("title").innerText = titleAfterYear || "CrossWordy";
 }
 
@@ -975,7 +980,7 @@ if (databaseId) {
   createPuzzle();
 }
 
-// TODO add deletion mechanism using puzzles/ID/creation, where default creation is 2020-02-20
+// TODO add deletion mechanism using puzzles/ID/crossWordyCreationMS, where default crossWordyCreationMS is 2023-03-20
 
 /*
 Debugging snippet!
