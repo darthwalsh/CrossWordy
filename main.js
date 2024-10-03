@@ -980,7 +980,7 @@ if (databaseId) {
   createPuzzle();
 }
 
-// TODO add deletion mechanism using puzzles/ID/crossWordyCreationMS, where default crossWordyCreationMS is 2023-03-20
+// TODO add deletion mechanism using puzzles/ID/crossWordyCreationMS, where default crossWordyCreationMS is 2023-03-20 -- maybe using TTL mechanism? https://cloud.google.com/firestore/docs/ttl?hl=en
 
 /*
 Debugging snippet!
