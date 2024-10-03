@@ -150,6 +150,7 @@ td > input {
   align-items: center;
   background-color: #a4abff;
   height: calc(min(100vh / var(--grid-height), 10vh));
+  overflow-wrap: anywhere;
 }
 
 #share {

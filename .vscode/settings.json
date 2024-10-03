@@ -1,3 +1,13 @@
 {
-  "cSpell.words": ["aclues", "cluebar", "darkred", "dclues", "minmax", "topleft"]
+  "cSpell.words": [
+    "aclues",
+    "cluebar",
+    "darkred",
+    "dclues",
+    "minmax",
+    "topleft"
+  ],
+  "git.branchProtection": [
+    ""
+  ]
 }
