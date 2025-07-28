@@ -19,10 +19,10 @@ Based on analysis of the existing CrossWordy codebase and the NYT Calendar PRD r
 
 ## Relevant Files
 
-- `index.html` - Add NYT button to header and calendar modal structure
-- `style.css` - Calendar styling, visual indicators, responsive design for calendar UI
-- `main.js` - Core calendar functionality, NYT API integration, and calendar-puzzle integration
-- `calendar.js` - New file for calendar-specific logic and UI management
+- `index.html` - NYT button in header and calendar modal structure ✅
+- `style.css` - Calendar styling, visual indicators, responsive design for calendar UI ✅
+- `calendar.js` - Calendar-specific logic and UI management ✅ 
+- `main.js` - Integration points with existing puzzle system
 - `nyt-api.js` - New file for NYT puzzle import functionality and API handling
 - `calendar-db.js` - New file for calendar data management and Firestore operations
 
@@ -36,14 +36,14 @@ Based on analysis of the existing CrossWordy codebase and the NYT Calendar PRD r
 
 ## Tasks
 
-- [ ] 1.0 Implement Calendar UI and Navigation
-  - [ ] 1.1 Add "NYT" button to header section next to existing buttons
-  - [ ] 1.2 Create calendar modal overlay with month/year navigation controls
-  - [ ] 1.3 Implement calendar grid layout showing dates for selected month
-  - [ ] 1.4 Add visual indicators for puzzle states (not started, in progress, completed, manually marked)
-  - [ ] 1.5 Style calendar to match existing app design with responsive mobile support
-  - [ ] 1.6 Implement calendar modal open/close functionality and keyboard navigation
-  - [ ] 1.7 Add date selection handling and highlight current date
+- [x] 1.0 Implement Calendar UI and Navigation
+  - [x] 1.1 Add "NYT" button to header section next to existing buttons
+  - [x] 1.2 Create calendar modal overlay with month/year navigation controls
+  - [x] 1.3 Implement calendar grid layout showing dates for selected month
+  - [x] 1.4 Add visual indicators for puzzle states (not started, in progress, completed, manually marked)
+  - [x] 1.5 Style calendar to match existing app design with responsive mobile support
+  - [x] 1.6 Implement calendar modal open/close functionality and keyboard navigation
+  - [x] 1.7 Add date selection handling and highlight current date
 
 - [ ] 2.0 Add NYT Puzzle Import Functionality
   - [ ] 2.1 Implement NYT API endpoint calls using fetch with CORS handling

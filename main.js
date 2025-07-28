@@ -627,6 +627,9 @@ function parseClues(s) {
 }
 
 async function play() {
+  // Hide NYT button in play mode since calendar is only for creating/importing
+  $("nyt-button").style.display = "none";
+  
   puzzleDoc = db.collection("puzzles").doc(databaseId);
   const dataReq = await puzzleDoc.get();
   const data = dataReq.data();
@@ -978,6 +981,8 @@ if (databaseId) {
   play();
 } else {
   createPuzzle();
+  // Initialize calendar modal only in create mode
+  initCalendarModal();
 }
 
 // TODO add deletion mechanism using puzzles/ID/crossWordyCreationMS, where default crossWordyCreationMS is 2023-03-20 -- maybe using TTL mechanism? https://cloud.google.com/firestore/docs/ttl?hl=en

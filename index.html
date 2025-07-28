@@ -32,6 +32,7 @@
           <label for="rebus">Rebus</label>
         </div>
         <h1 id="title">CrossWordy</h1>
+        <button id="nyt-button">NYT</button>
         <button class="sol" id="sol-whats-wrong">What's Wrong</button>
         <button class="sol" id="sol-check">Check</button>
         <span id="time">A</span>
@@ -60,8 +61,27 @@
 
     <div id="measurer"></div>
 
+    <!-- Calendar Modal -->
+    <div id="calendar-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>NYT Daily Crossword Calendar</h2>
+          <button id="calendar-close" class="close-button">&times;</button>
+        </div>
+        <div class="calendar-navigation">
+          <button id="prev-month" class="nav-button">&lt;</button>
+          <span id="month-year-display">January 2024</span>
+          <button id="next-month" class="nav-button">&gt;</button>
+        </div>
+        <div id="calendar-grid" class="calendar-grid">
+          <!-- Calendar dates will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-firestore.js"></script>
+    <script src="calendar.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/darthwalsh/puzjs@utf8/src/puz.js"></script>
     <script src="main.js"></script>
   </body>
