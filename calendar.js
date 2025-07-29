@@ -1,40 +1,8 @@
-// NYT Crossword URL Functions
-const NYT_BASE_URL = "https://www.nytimes.com/crosswords/game/daily/";
 
-/**
- * Convert a Date object to NYT URL format
- * @param {Date} date - The date to convert
- * @returns {string} - Format: "YYYY/MM/DD"
- */
-function dateToNYTUrlPath(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}/${month}/${day}`;
-}
-
-/**
- * Generate NYT crossword URL for a given date
- * @param {Date} date - The date of the puzzle
- * @returns {string} - The NYT crossword URL
- */
-function generateNYTCrosswordUrl(date) {
-  const urlPath = dateToNYTUrlPath(date);
-  return `${NYT_BASE_URL}${urlPath}`;
-}
-
-/**
- * Open NYT crossword page for a given date in a new tab
- * @param {Date} date - The date of the puzzle to open
- */
+/** @param {Date} date - The date of the puzzle to open */
 function openNYTCrosswordPage(date) {
-  const url = generateNYTCrosswordUrl(date);
-  const dateString = date.toLocaleDateString();
-  
-  console.log(`Opening NYT crossword for ${dateString}: ${url}`);
-  
-  // Open in new tab
-  window.open(url, '_blank');
+  const ymd = new Date(date).toLocaleDateString('en-CA').replace(/-/g, '/');
+  window.open(`https://www.nytimes.com/crosswords/game/daily/${ymd}`, '_blank');
 }
 
 // Calendar Modal Functionality
@@ -49,15 +17,6 @@ function initCalendarModal() {
   
   let currentDate = new Date();
   let selectedDate = null;
-  
-  // Open NYT puzzle page for the selected date
-  function importNYTPuzzle(date) {
-    const dateString = date.toLocaleDateString();
-    console.log(`Opening NYT puzzle page for ${dateString}`);
-    
-          closeModal();
-      openNYTCrosswordPage(date);
-  }
 
   // Mock function to demonstrate puzzle states
   // TODO: Replace with actual database queries
@@ -178,8 +137,8 @@ function initCalendarModal() {
       dateDiv.classList.add('selected');
       selectedDate = cellDate;
       
-      // Import NYT puzzle for selected date
-      importNYTPuzzle(cellDate);
+      closeModal();
+      openNYTCrosswordPage(selectedDate);
     };
     
     // Add right-click handler for manual completion
