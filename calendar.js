@@ -1,47 +1,41 @@
-// NYT Crossword URL Generator
-class NYTApi {
-  constructor() {
-    this.baseUrl = "https://www.nytimes.com/crosswords/game/daily/";
-  }
+// NYT Crossword URL Functions
+const NYT_BASE_URL = "https://www.nytimes.com/crosswords/game/daily/";
 
-  /**
-   * Convert a Date object to NYT URL format
-   * @param {Date} date - The date to convert
-   * @returns {string} - Format: "YYYY/MM/DD"
-   */
-  dateToUrlPath(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}/${month}/${day}`;
-  }
-
-  /**
-   * Generate NYT crossword URL for a given date
-   * @param {Date} date - The date of the puzzle
-   * @returns {string} - The NYT crossword URL
-   */
-  generateCrosswordUrl(date) {
-    const urlPath = this.dateToUrlPath(date);
-    return `${this.baseUrl}${urlPath}`;
-  }
-
-  /**
-   * Open NYT crossword page for a given date in a new tab
-   * @param {Date} date - The date of the puzzle to open
-   */
-  openCrosswordPage(date) {
-    const url = this.generateCrosswordUrl(date);
-    const dateString = date.toLocaleDateString();
-    
-    console.log(`Opening NYT crossword for ${dateString}: ${url}`);
-    
-    // Open in new tab
-    window.open(url, '_blank');
-  }
+/**
+ * Convert a Date object to NYT URL format
+ * @param {Date} date - The date to convert
+ * @returns {string} - Format: "YYYY/MM/DD"
+ */
+function dateToNYTUrlPath(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}/${month}/${day}`;
 }
 
-const nytApi = new NYTApi();
+/**
+ * Generate NYT crossword URL for a given date
+ * @param {Date} date - The date of the puzzle
+ * @returns {string} - The NYT crossword URL
+ */
+function generateNYTCrosswordUrl(date) {
+  const urlPath = dateToNYTUrlPath(date);
+  return `${NYT_BASE_URL}${urlPath}`;
+}
+
+/**
+ * Open NYT crossword page for a given date in a new tab
+ * @param {Date} date - The date of the puzzle to open
+ */
+function openNYTCrosswordPage(date) {
+  const url = generateNYTCrosswordUrl(date);
+  const dateString = date.toLocaleDateString();
+  
+  console.log(`Opening NYT crossword for ${dateString}: ${url}`);
+  
+  // Open in new tab
+  window.open(url, '_blank');
+}
 
 // Calendar Modal Functionality
 function initCalendarModal() {
@@ -61,22 +55,8 @@ function initCalendarModal() {
     const dateString = date.toLocaleDateString();
     console.log(`Opening NYT puzzle page for ${dateString}`);
     
-    try {
-      // Check if NYT API is available
-      if (typeof nytApi === 'undefined') {
-        throw new Error('NYT API not available. Please ensure nyt-api.js is loaded.');
-      }
-      
-      // Close calendar modal first
-      closeModal();
-      
-      // Open NYT crossword page in new tab
-      nytApi.openCrosswordPage(date);
-      
-    } catch (error) {
-      console.error('Error opening NYT puzzle:', error);
-      alert(`Error opening puzzle: ${error.message}`);
-    }
+          closeModal();
+      openNYTCrosswordPage(date);
   }
 
   // Mock function to demonstrate puzzle states
