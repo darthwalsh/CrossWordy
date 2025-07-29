@@ -21,9 +21,8 @@ Based on analysis of the existing CrossWordy codebase and the NYT Calendar PRD r
 
 - `index.html` - NYT button in header and calendar modal structure ✅
 - `style.css` - Calendar styling, visual indicators, responsive design for calendar UI ✅
-- `calendar.js` - Calendar-specific logic and UI management ✅ 
+- `calendar.js` - Calendar-specific logic, UI management, and NYT integration ✅ 
 - `main.js` - Integration points with existing puzzle system
-- `nyt-api.js` - NYT crossword URL generation and manual upload workflow ✅
 - `calendar-db.js` - New file for calendar data management and Firestore operations
 
 ### Notes
