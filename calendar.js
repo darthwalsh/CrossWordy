@@ -11,6 +11,85 @@ function initCalendarModal() {
   let currentDate = new Date();
   let selectedDate = null;
   
+  // Import NYT puzzle for the selected date
+  async function importNYTPuzzle(date) {
+    const dateString = date.toLocaleDateString();
+    console.log(`Importing NYT puzzle for ${dateString}`);
+    
+    try {
+      // Show loading indicator
+      const loadingMsg = `Downloading NYT puzzle for ${dateString}...`;
+      console.log(loadingMsg);
+      
+      // Check if NYT API is available
+      if (typeof nytApi === 'undefined') {
+        throw new Error('NYT API not available. Please ensure nyt-api.js is loaded.');
+      }
+      
+      // Download and convert puzzle
+      const puzzleData = await nytApi.downloadPuzzleWithFallback(date);
+      
+      if (puzzleData) {
+        console.log('Puzzle downloaded successfully:', puzzleData.title);
+        
+        // Close calendar modal
+        closeModal();
+        
+        // Load puzzle data into the interface
+        loadPuzzleData(puzzleData);
+        
+        alert(`Successfully imported: ${puzzleData.title}`);
+      }
+      // If puzzleData is null, user chose manual upload - no further action needed
+      
+    } catch (error) {
+      console.error('Error importing NYT puzzle:', error);
+      alert(`Error importing puzzle: ${error.message}`);
+    }
+  }
+  
+  // Load puzzle data into the CrossWordy interface
+  function loadPuzzleData(puzzleData) {
+    try {
+      // Set global puzzle data (similar to fromUpload function)
+      const darkStringRows = puzzleData.darkString.trim().split("_");
+      darks = darkStringRows.map(row => row.split("").map(c => c == "@"));
+      circles = darkStringRows.map(row => row.split("").map(c => c == "O"));
+      shaded = darkStringRows.map(row => row.split("").map(c => c == "#"));
+      
+      solution = puzzleData.solution ? 
+        puzzleData.solution.split("\n").map(row => row.split("\t")) : null;
+      
+      // Set grid dimensions
+      const w = darks[0].length;
+      const h = darks.length;
+      $("w_h").value = `${w} ${h}`;
+      
+      // Draw the grid
+      drawCreateGrid(`${w} ${h}`);
+      
+      // Set clues
+      if (puzzleData.across) {
+        $("aclues").value = puzzleData.across;
+        validateClues($("aclues"));
+      }
+      
+      if (puzzleData.down) {
+        $("dclues").value = puzzleData.down;
+        validateClues($("dclues"));
+      }
+      
+      // Set title
+      $("title").innerText = puzzleData.title || "NYT Daily Crossword";
+      
+      console.log('Puzzle data loaded successfully');
+      
+    } catch (error) {
+      console.error('Error loading puzzle data:', error);
+      alert(`Error loading puzzle: ${error.message}`);
+    }
+  }
+
   // Mock function to demonstrate puzzle states
   // TODO: Replace with actual database queries
   function getPuzzleState(date) {
@@ -130,7 +209,8 @@ function initCalendarModal() {
       dateDiv.classList.add('selected');
       selectedDate = cellDate;
       
-      // TODO: Handle date selection (import puzzle)
+      // Import NYT puzzle for selected date
+      importNYTPuzzle(cellDate);
     };
     
     // Add right-click handler for manual completion

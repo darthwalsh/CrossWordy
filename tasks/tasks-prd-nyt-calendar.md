@@ -45,14 +45,14 @@ Based on analysis of the existing CrossWordy codebase and the NYT Calendar PRD r
   - [x] 1.6 Implement calendar modal open/close functionality and keyboard navigation
   - [x] 1.7 Add date selection handling and highlight current date
 
-- [ ] 2.0 Add NYT Puzzle Import Functionality
-  - [ ] 2.1 Implement NYT API endpoint calls using fetch with CORS handling
-  - [ ] 2.2 Add browser cookie extraction for NYT authentication (NYT-S cookie)
-  - [ ] 2.3 Create NYT JSON to CrossWordy data format conversion function
-  - [ ] 2.4 Implement fallback API endpoint logic with cookie headers
-  - [ ] 2.5 Add graceful error handling and fallback to manual PUZ upload
-  - [ ] 2.6 Create date-to-filename conversion (daily/YYYY-MM-DD format)
-  - [ ] 2.7 Test import functionality with various date ranges and handle missing puzzles
+- [x] 2.0 Add NYT Puzzle Import Functionality
+  - [x] 2.1 Implement NYT API endpoint calls using fetch with CORS handling
+  - [x] 2.2 Add browser cookie extraction for NYT authentication (NYT-S cookie)
+  - [x] 2.3 Create NYT JSON to CrossWordy data format conversion function
+  - [x] 2.4 Implement fallback API endpoint logic with cookie headers
+  - [x] 2.5 Add graceful error handling and fallback to manual PUZ upload
+  - [x] 2.6 Create date-to-filename conversion (daily/YYYY-MM-DD format)
+  - [x] 2.7 Test import functionality with various date ranges and handle missing puzzles
 
 - [ ] 3.0 Create Calendar Data Management System
   - [ ] 3.1 Design Firestore calendar document schema with date mappings and puzzle references
