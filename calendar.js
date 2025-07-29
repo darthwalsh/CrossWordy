@@ -17,19 +17,102 @@ function initCalendarModal() {
   
   let currentDate = new Date();
   let selectedDate = null;
+  let currentCalendarId = null;
+  let calendarData = null;
 
-  // Mock function to demonstrate puzzle states
-  // TODO: Replace with actual database queries
+  // Calendar Management Functions
+  
+  /**
+   * Initialize calendar from URL parameter or create new one
+   */
+  async function initializeCalendar() {
+    const urlParams = new URLSearchParams(window.location.search);
+    currentCalendarId = urlParams.get("calendar");
+    
+    if (currentCalendarId) {
+      // Load existing calendar
+      try {
+        calendarData = await calendarDB.getCalendar(currentCalendarId);
+        if (calendarData) {
+          console.log(`Loaded calendar: ${currentCalendarId}`);
+          setupCalendarListeners();
+        } else {
+          console.warn(`Calendar ${currentCalendarId} not found, creating new one`);
+          await createNewCalendar();
+        }
+      } catch (error) {
+        console.error('Error loading calendar:', error);
+        await createNewCalendar();
+      }
+    } else {
+      // Create new calendar
+      await createNewCalendar();
+    }
+  }
+  
+  /**
+   * Create a new calendar and update URL
+   */
+  async function createNewCalendar() {
+    try {
+      currentCalendarId = await calendarDB.createCalendar();
+      calendarData = { id: currentCalendarId, dates: {} };
+      
+      // Update URL without page reload
+      const newUrl = calendarDB.generateShareableUrl(currentCalendarId);
+      window.history.pushState({}, '', newUrl);
+      
+      console.log(`Created new calendar: ${currentCalendarId}`);
+      console.log(`Shareable URL: ${newUrl}`);
+      
+      setupCalendarListeners();
+    } catch (error) {
+      console.error('Error creating calendar:', error);
+      alert('Error creating calendar. Please try again.');
+    }
+  }
+  
+  /**
+   * Set up real-time listeners for calendar updates
+   */
+  function setupCalendarListeners() {
+    if (!currentCalendarId) return;
+    
+    // Listen for calendar data changes
+    calendarDB.onCalendarUpdate(currentCalendarId, (updatedData) => {
+      calendarData = updatedData;
+      // Regenerate calendar grid to reflect new data
+      if (modal.style.display === 'flex') {
+        generateCalendarGrid();
+      }
+    });
+  }
+  
+  /**
+   * Get puzzle state for a date from calendar data
+   * @param {Date} date - The date to check
+   * @returns {string|null} - The puzzle state CSS class or null
+   */
   function getPuzzleState(date) {
-    const day = date.getDate();
+    if (!calendarData || !calendarData.dates) return null;
     
-    // Mock data for demonstration
-    if (day % 7 === 1) return "puzzle-completed";      // Every 7th day starting from 1st
-    if (day % 7 === 2) return "puzzle-in-progress";    // Every 7th day starting from 2nd  
-    if (day % 7 === 3) return "puzzle-manually-marked"; // Every 7th day starting from 3rd
+    const dateKey = calendarDB.formatDateKey(date);
+    const dateData = calendarData.dates[dateKey];
     
-    // Most days are not started (no special class)
-    return null;
+    if (!dateData) return null;
+    
+    // Map database status to CSS class
+    switch (dateData.status) {
+      case 'completed':
+        return 'puzzle-completed';
+      case 'in-progress':
+        return 'puzzle-in-progress';
+      case 'manually-marked':
+        return 'puzzle-manually-marked';
+      case 'not-started':
+      default:
+        return null;
+    }
   }
   
   function updateMonthDisplay() {
@@ -142,33 +225,45 @@ function initCalendarModal() {
     };
     
     // Add right-click handler for manual completion
-    dateDiv.oncontextmenu = (e) => {
+    dateDiv.oncontextmenu = async (e) => {
       e.preventDefault();
       
-      if (isOtherMonth) return;
+      if (isOtherMonth || !currentCalendarId) return;
       
-      // Toggle manual completion state
-      const hasManualMark = dateDiv.classList.contains('puzzle-manually-marked');
-      const hasCompleted = dateDiv.classList.contains('puzzle-completed');
-      const hasInProgress = dateDiv.classList.contains('puzzle-in-progress');
-      
-      // Remove all puzzle state classes
-      dateDiv.classList.remove('puzzle-completed', 'puzzle-in-progress', 'puzzle-manually-marked');
-      
-      if (!hasManualMark) {
-        // Mark as manually completed
-        dateDiv.classList.add('puzzle-manually-marked');
-        // TODO: Save to database
+      try {
+        const currentState = getPuzzleState(cellDate);
+        let newStatus;
+        
+        if (currentState === 'puzzle-manually-marked') {
+          // If already manually marked, remove it (set to not started)
+          newStatus = 'not-started';
+        } else {
+          // Mark as manually completed
+          newStatus = 'manually-marked';
+        }
+        
+        // Update in database
+        await calendarDB.updateDateStatus(currentCalendarId, cellDate, newStatus);
+        
+        console.log(`Updated ${cellDate.toDateString()} to ${newStatus}`);
+      } catch (error) {
+        console.error('Error updating date status:', error);
+        alert('Error updating date status. Please try again.');
       }
-      // If already manually marked, remove it (set to not started)
     };
     
     return dateDiv;
   }
   
-  function openModal() {
+  async function openModal() {
     modal.style.display = "flex";
     updateMonthDisplay();
+    
+    // Initialize calendar if not already done
+    if (!currentCalendarId) {
+      await initializeCalendar();
+    }
+    
     generateCalendarGrid();
   }
   

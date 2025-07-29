@@ -23,7 +23,7 @@ Based on analysis of the existing CrossWordy codebase and the NYT Calendar PRD r
 - `style.css` - Calendar styling, visual indicators, responsive design for calendar UI ✅
 - `calendar.js` - Calendar-specific logic, UI management, and NYT integration ✅ 
 - `main.js` - Integration points with existing puzzle system
-- `calendar-db.js` - New file for calendar data management and Firestore operations
+- `calendar-db.js` - Calendar data management and Firestore operations ✅
 
 ### Notes
 
@@ -53,13 +53,13 @@ Based on analysis of the existing CrossWordy codebase and the NYT Calendar PRD r
   - [x] 2.6 Create date-to-URL conversion (YYYY/MM/DD format)
   - [x] 2.7 Test import functionality with tab opening and upload workflow
 
-- [ ] 3.0 Create Calendar Data Management System
-  - [ ] 3.1 Design Firestore calendar document schema with date mappings and puzzle references
-  - [ ] 3.2 Implement calendar creation and document initialization in Firestore
-  - [ ] 3.3 Add CRUD operations for calendar document updates (status changes, puzzle links)
-  - [ ] 3.4 Create URL parameter system for calendar sharing (similar to puzzle sharing)
-  - [ ] 3.5 Implement date-to-puzzle-status mapping and persistence
-  - [ ] 3.6 Add calendar document metadata (creation date, title, etc.)
+- [x] 3.0 Create Calendar Data Management System
+  - [x] 3.1 Design Firestore calendar document schema with date mappings and puzzle references
+  - [x] 3.2 Implement calendar creation and document initialization in Firestore
+  - [x] 3.3 Add CRUD operations for calendar document updates (status changes, puzzle links)
+  - [x] 3.4 Create URL parameter system for calendar sharing (similar to puzzle sharing)
+  - [x] 3.5 Implement date-to-puzzle-status mapping and persistence
+  - [x] 3.6 Add calendar document metadata (creation date, title, etc.)
 
 - [ ] 4.0 Integrate Calendar with Existing Puzzle System
   - [ ] 4.1 Hook into existing puzzle completion detection in updateChars function
