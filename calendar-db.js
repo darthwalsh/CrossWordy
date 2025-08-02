@@ -187,5 +187,5 @@ class CalendarDB {
   }
 }
 
-// Export instance for use in other files
-const calendarDB = new CalendarDB(); 
+// Export instance - will be initialized after db is available
+let calendarDB; 

@@ -7,6 +7,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Initialize calendar database after db is available
+if (typeof CalendarDB !== 'undefined') {
+  calendarDB = new CalendarDB();
+}
+
 function $(id) {
   return document.getElementById(id);
 }
