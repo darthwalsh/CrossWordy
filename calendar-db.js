@@ -42,22 +42,35 @@ class CalendarDB {
       console.log('Creating calendar, db available:', typeof db);
       console.log('Creating calendar, this.collection:', this.collection);
       
+      console.log('Step 1: Creating timestamp...');
+      const timestamp = firebase.firestore.Timestamp.now();
+      console.log('Timestamp created:', timestamp);
+      
+      console.log('Step 2: Creating calendar data...');
       const calendarData = {
-        creation: firebase.firestore.Timestamp.now(),
+        creation: timestamp,
         title: title || '',
         dates: {}
       };
+      console.log('Calendar data:', calendarData);
 
+      console.log('Step 3: Adding to collection...');
       const ref = await this.collection.add(calendarData);
+      console.log('Document added, ref:', ref, 'ID:', ref.id);
       
-      // Create live subcollection for real-time updates (similar to puzzle structure)
+      console.log('Step 4: Creating live subcollection...');
       await ref.collection("live").doc("updates").set({});
+      console.log('Live subcollection created');
       
       console.log(`Created new calendar: ${ref.id}`);
       return ref.id;
     } catch (error) {
       console.error('Error creating calendar:', error);
-      console.error('Full error details:', error);
+      console.error('Error message:', error.message);
+      console.error('Error code:', error.code);
+      console.error('Error stack:', error.stack);
+      console.error('Error name:', error.name);
+      console.error('Error toString:', error.toString());
       throw error;
     }
   }
