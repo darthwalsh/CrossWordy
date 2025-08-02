@@ -38,6 +38,10 @@ class CalendarDB {
    */
   async createCalendar(title = '') {
     try {
+      console.log('Creating calendar, firebase available:', typeof firebase);
+      console.log('Creating calendar, db available:', typeof db);
+      console.log('Creating calendar, this.collection:', this.collection);
+      
       const calendarData = {
         creation: firebase.firestore.Timestamp.now(),
         title: title || '',
@@ -53,6 +57,7 @@ class CalendarDB {
       return ref.id;
     } catch (error) {
       console.error('Error creating calendar:', error);
+      console.error('Full error details:', error);
       throw error;
     }
   }
