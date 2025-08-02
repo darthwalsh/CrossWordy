@@ -55,9 +55,6 @@ function initCalendarModal() {
    */
   async function createNewCalendar() {
     try {
-      console.log('Creating new calendar, calendarDB available:', typeof calendarDB);
-      console.log('calendarDB object:', calendarDB);
-      
       currentCalendarId = await calendarDB.createCalendar();
       calendarData = { id: currentCalendarId, dates: {} };
       
@@ -71,7 +68,6 @@ function initCalendarModal() {
       setupCalendarListeners();
     } catch (error) {
       console.error('Error creating calendar:', error);
-      console.error('Full error details:', error);
       alert('Error creating calendar. Please try again.');
     }
   }
