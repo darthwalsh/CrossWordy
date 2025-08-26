@@ -61,14 +61,14 @@ Based on analysis of the existing CrossWordy codebase and the NYT Calendar PRD r
   - [x] 3.5 Implement date-to-puzzle-status mapping and persistence
   - [x] 3.6 Add calendar document metadata (creation date, title, etc.)
 
-- [ ] 4.0 Integrate Calendar with Existing Puzzle System
-  - [ ] 4.1 Hook into existing puzzle completion detection in updateChars function
-  - [ ] 4.2 Add automatic calendar status updates when puzzles are completed
-  - [ ] 4.3 Implement manual "mark as done" functionality for calendar dates
-  - [ ] 4.4 Create navigation from calendar date selection to puzzle solving interface
-  - [ ] 4.5 Handle puzzle creation and linking when importing from calendar
-  - [ ] 4.6 Add visual distinction between app-completed vs manually-marked puzzles
-  - [ ] 4.7 Ensure puzzle-to-calendar relationship is bidirectional
+- [x] 4.0 Integrate Calendar with Existing Puzzle System
+  - [x] 4.1 Hook into existing puzzle completion detection in updateChars function
+  - [x] 4.2 Add automatic calendar status updates when puzzles are completed
+  - [x] 4.3 Implement manual "mark as done" functionality for calendar dates
+  - [x] 4.4 Create navigation from calendar date selection to puzzle solving interface
+  - [x] 4.5 Handle puzzle creation and linking when importing from calendar
+  - [x] 4.6 Add visual distinction between app-completed vs manually-marked puzzles
+  - [x] 4.7 Ensure puzzle-to-calendar relationship is bidirectional
 
 - [ ] 5.0 Implement Real-time Calendar Sharing and Updates
   - [ ] 5.1 Set up Firestore onSnapshot listeners for calendar document changes

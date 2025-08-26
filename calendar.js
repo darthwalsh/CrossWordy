@@ -5,6 +5,47 @@ function openNYTCrosswordPage(date) {
   window.open(`https://www.nytimes.com/crosswords/game/daily/${ymd}`, '_blank');
 }
 
+/**
+ * Handle calendar date selection - navigate to existing puzzle or start import
+ * @param {Date} selectedDate - The selected calendar date
+ */
+async function handleDateSelection(selectedDate) {
+  if (!currentCalendarId) {
+    console.error('No calendar loaded');
+    return;
+  }
+
+  try {
+    const dateKey = calendarDB.formatDateKey(selectedDate);
+    
+    // Check if puzzle already exists for this date
+    const dateData = calendarData.dates && calendarData.dates[dateKey];
+    
+    if (dateData && dateData.puzzleId) {
+      // Navigate to existing puzzle
+      console.log(`Navigating to existing puzzle: ${dateData.puzzleId}`);
+      window.location = `?id=${dateData.puzzleId}`;
+    } else {
+      // No puzzle exists - open NYT page for manual import
+      console.log(`No puzzle found for ${dateKey}, opening NYT page for import`);
+      
+      // Store the selected date and calendar for when user uploads puzzle
+      sessionStorage.setItem('pendingCalendarDate', dateKey);
+      sessionStorage.setItem('pendingCalendarId', currentCalendarId);
+      
+      openNYTCrosswordPage(selectedDate);
+    }
+  } catch (error) {
+    console.error('Error handling date selection:', error);
+    // Fallback to opening NYT page
+    openNYTCrosswordPage(selectedDate);
+  }
+}
+
+// Global calendar state variables
+let currentCalendarId = null;
+let calendarData = null;
+
 // Calendar Modal Functionality
 function initCalendarModal() {
   const modal = $("calendar-modal");
@@ -17,8 +58,6 @@ function initCalendarModal() {
   
   let currentDate = new Date();
   let selectedDate = null;
-  let currentCalendarId = null;
-  let calendarData = null;
 
   // Calendar Management Functions
   
@@ -221,7 +260,7 @@ function initCalendarModal() {
       selectedDate = cellDate;
       
       closeModal();
-      openNYTCrosswordPage(selectedDate);
+      handleDateSelection(selectedDate);
     };
     
     // Add right-click handler for manual completion
