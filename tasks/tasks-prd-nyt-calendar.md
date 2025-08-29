@@ -71,10 +71,10 @@ Based on analysis of the existing CrossWordy codebase and the NYT Calendar PRD r
   - [x] 4.7 Ensure puzzle-to-calendar relationship is bidirectional
 
 - [ ] 5.0 Implement Real-time Calendar Sharing and Updates
-  - [ ] 5.1 Set up Firestore onSnapshot listeners for calendar document changes
-  - [ ] 5.2 Implement URL parameter parsing for calendar sharing (?calendar=ID)
-  - [ ] 5.3 Add real-time synchronization of calendar status changes across users
-  - [ ] 5.4 Handle concurrent user access and conflict resolution for calendar updates
-  - [ ] 5.5 Implement live visual updates when other users mark puzzles as done
-  - [ ] 5.6 Add error handling for network connectivity and failed syncs
+  - [x] 5.1 Set up Firestore onSnapshot listeners for calendar document changes
+  - [x] 5.2 Implement URL parameter parsing for calendar sharing (?calendar=ID)
+  - [x] 5.3 Add real-time synchronization of calendar status changes across users
+  - [x] 5.4 Handle concurrent user access and conflict resolution for calendar updates
+  - [x] 5.5 Implement live visual updates when other users mark puzzles as done
+  - [x] 5.6 Add error handling for network connectivity and failed syncs
   - [ ] 5.7 Test multi-user calendar sharing and real-time update functionality 

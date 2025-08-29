@@ -66,15 +66,34 @@ function initCalendarModal() {
    */
   async function initializeCalendar() {
     const urlParams = new URLSearchParams(window.location.search);
-    currentCalendarId = urlParams.get("calendar");
+    const newCalendarId = urlParams.get("calendar");
+    
+    // If we're switching calendars, clean up old listeners
+    if (currentCalendarId && currentCalendarId !== newCalendarId) {
+      console.log(`Switching from calendar ${currentCalendarId} to ${newCalendarId}`);
+      cleanupCalendarListeners(currentCalendarId);
+    }
+    
+    currentCalendarId = newCalendarId;
     
     if (currentCalendarId) {
       // Load existing calendar
       try {
+        console.log(`Loading existing calendar: ${currentCalendarId}`);
         calendarData = await calendarDB.getCalendar(currentCalendarId);
+        
         if (calendarData) {
-          console.log(`Loaded calendar: ${currentCalendarId}`);
+          console.log(`Successfully loaded calendar: ${currentCalendarId}`);
+          // console.log(`Calendar data:`, calendarData);
+          
           setupCalendarListeners();
+          
+          // Update URL to ensure calendar parameter is present
+          const currentUrl = window.location.search;
+          if (!currentUrl.includes('calendar=')) {
+            const newUrl = calendarDB.generateShareableUrl(currentCalendarId);
+            window.history.pushState({}, '', newUrl);
+          }
         } else {
           console.warn(`Calendar ${currentCalendarId} not found, creating new one`);
           await createNewCalendar();
@@ -84,7 +103,6 @@ function initCalendarModal() {
         await createNewCalendar();
       }
     } else {
-      // Create new calendar
       await createNewCalendar();
     }
   }
@@ -97,17 +115,115 @@ function initCalendarModal() {
       currentCalendarId = await calendarDB.createCalendar();
       calendarData = { id: currentCalendarId, dates: {} };
       
-      // Update URL without page reload
+      console.log(`Successfully created new calendar: ${currentCalendarId}`);
+      
       const newUrl = calendarDB.generateShareableUrl(currentCalendarId);
       window.history.pushState({}, '', newUrl);
       
-      console.log(`Created new calendar: ${currentCalendarId}`);
       console.log(`Shareable URL: ${newUrl}`);
       
       setupCalendarListeners();
+      
+      if (modal.style.display === 'flex') {
+        showSharingInfo(currentCalendarId, newUrl);
+      }
+      
     } catch (error) {
       console.error('Error creating calendar:', error);
       alert('Error creating calendar. Please try again.');
+    }
+  }
+  
+  /**
+   * Show sharing information to the user
+   */
+  function showSharingInfo(calendarId, shareUrl) {
+    // Create a temporary sharing info element
+    const sharingInfo = document.createElement('div');
+    sharingInfo.className = 'sharing-info';
+    sharingInfo.innerHTML = `
+      <div style="background: #e8f5e8; border: 1px solid #28a745; border-radius: 5px; padding: 10px; margin: 10px 0; text-align: center;">
+        <strong>🎉 Calendar Created!</strong><br>
+        Share this URL with friends:<br>
+        <code style="background: white; padding: 2px 4px; border-radius: 3px;">${shareUrl}</code><br>
+        <small>Changes will sync in real-time across all users</small>
+      </div>
+    `;
+    
+    // Insert after the calendar grid
+    const calendarGrid = $("calendar-grid");
+    calendarGrid.parentNode.insertBefore(sharingInfo, calendarGrid.nextSibling);
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+      if (sharingInfo.parentNode) {
+        sharingInfo.parentNode.removeChild(sharingInfo);
+      }
+    }, 5000);
+  }
+  
+  /**
+   * Show network error message to user
+   */
+  function showNetworkError(error, retryCount, context) {
+    hideNetworkError(); // Remove any existing error messages
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'network-error';
+    errorDiv.className = 'network-error';
+    errorDiv.innerHTML = `
+      <div style="background: #f8d7da; border: 1px solid #dc3545; border-radius: 5px; padding: 10px; margin: 10px 0; text-align: center;">
+        <strong>⚠️ Connection Issue</strong><br>
+        ${context} connection failed (attempt ${retryCount}/3)<br>
+        <small>Retrying automatically... <button onclick="location.reload()" style="background: #dc3545; color: white; border: none; padding: 2px 8px; border-radius: 3px; cursor: pointer;">Refresh Now</button></small>
+      </div>
+    `;
+    
+    // Insert after the calendar grid
+    const calendarGrid = $("calendar-grid");
+    calendarGrid.parentNode.insertBefore(errorDiv, calendarGrid.nextSibling);
+  }
+  
+  /**
+   * Hide network error message
+   */
+  function hideNetworkError() {
+    const existingError = document.getElementById('network-error');
+    if (existingError) {
+      existingError.remove();
+    }
+  }
+  
+  /**
+   * Show active users indicator
+   */
+  function showActiveUsersIndicator(activeUsers) {
+    hideActiveUsersIndicator(); // Remove any existing indicator
+    
+    if (!activeUsers || activeUsers.length === 0) return;
+    
+    const activeDiv = document.createElement('div');
+    activeDiv.id = 'active-users';
+    activeDiv.className = 'active-users';
+    activeDiv.innerHTML = `
+      <div style="background: #e3f2fd; border: 1px solid #2196f3; border-radius: 5px; padding: 8px; margin: 10px 0; text-align: center; font-size: 0.9em;">
+        <strong>👥 Active Users</strong><br>
+        <small>${activeUsers.length} user${activeUsers.length > 1 ? 's' : ''} currently viewing this calendar</small>
+      </div>
+    `;
+    
+    // Insert after the calendar grid
+    const calendarGrid = $("calendar-grid");
+    calendarGrid.parentNode.insertBefore(activeDiv, calendarGrid.nextSibling);
+  }
+  
+  /**
+   * Hide active users indicator
+   */
+  function hideActiveUsersIndicator() {
+    const existingIndicator = document.getElementById('active-users');
+    if (existingIndicator) {
+      existingIndicator.remove();
     }
   }
   
@@ -117,14 +233,106 @@ function initCalendarModal() {
   function setupCalendarListeners() {
     if (!currentCalendarId) return;
     
-    // Listen for calendar data changes
-    calendarDB.onCalendarUpdate(currentCalendarId, (updatedData) => {
-      calendarData = updatedData;
-      // Regenerate calendar grid to reflect new data
-      if (modal.style.display === 'flex') {
-        generateCalendarGrid();
+    console.log(`Setting up real-time listeners for calendar: ${currentCalendarId}`);
+    
+    const userId = calendarDB.generateUserId();
+    const cleanupPresence = calendarDB.trackUserPresence(currentCalendarId, userId, 'User');
+    
+    const unsubscribePresence = calendarDB.onUserPresence(currentCalendarId, (activeUsers) => {
+      console.log('Active users:', activeUsers);
+      
+      const otherUsers = activeUsers.filter(user => user.id !== userId);
+      
+      if (otherUsers.length > 0) {
+        showActiveUsersIndicator(otherUsers);
+      } else {
+        hideActiveUsersIndicator();
       }
     });
+    
+    // Listen for calendar data changes
+    const unsubscribeCalendar = calendarDB.onCalendarUpdate(
+      currentCalendarId, 
+      (updatedData) => {
+        console.log('Calendar data updated:', updatedData);
+        calendarData = updatedData;
+        
+        // Regenerate calendar grid to reflect new data
+        if (modal.style.display === 'flex') {
+          generateCalendarGrid();
+        }
+        
+        // Update URL if this is a new calendar
+        if (!window.location.search.includes('calendar=')) {
+          const newUrl = calendarDB.generateShareableUrl(currentCalendarId);
+          window.history.pushState({}, '', newUrl);
+        }
+        
+        // Hide any error messages
+        hideNetworkError();
+      },
+      (error, retryCount) => {
+        console.error('Calendar listener error:', error, 'Retry:', retryCount);
+        showNetworkError(error, retryCount, 'calendar');
+      }
+    );
+    
+    // Listen for live updates (more granular changes)
+    const unsubscribeLive = calendarDB.onLiveUpdates(
+      currentCalendarId, 
+      (liveData) => {
+        console.log('Live update received:', liveData);
+        
+        // If we have a specific date change, we can optimize the update
+        if (liveData.changedDate && liveData.newStatus) {
+          // Update just the specific date in our local data
+          if (!calendarData.dates) calendarData.dates = {};
+          calendarData.dates[liveData.changedDate] = {
+            status: liveData.newStatus,
+            lastUpdated: liveData.lastChange,
+            ...(calendarData.dates[liveData.changedDate] || {})
+          };
+          
+          // Regenerate calendar grid to show the change
+          if (modal.style.display === 'flex') {
+            generateCalendarGrid();
+          }
+        }
+        
+        // Hide any error messages
+        hideNetworkError();
+      },
+      (error, retryCount) => {
+        console.error('Live updates listener error:', error, 'Retry:', retryCount);
+        showNetworkError(error, retryCount, 'live updates');
+      }
+    );
+    
+    // Store unsubscribe functions for cleanup
+    if (!window.calendarUnsubscribers) {
+      window.calendarUnsubscribers = {};
+    }
+    window.calendarUnsubscribers[currentCalendarId] = {
+      calendar: unsubscribeCalendar,
+      live: unsubscribeLive,
+      presence: unsubscribePresence,
+      cleanupPresence: cleanupPresence
+    };
+  }
+  
+  /**
+   * Clean up real-time listeners for a specific calendar
+   */
+  function cleanupCalendarListeners(calendarId) {
+    if (window.calendarUnsubscribers && window.calendarUnsubscribers[calendarId]) {
+      const { calendar, live, presence, cleanupPresence } = window.calendarUnsubscribers[calendarId];
+      if (calendar) calendar();
+      if (live) live();
+      if (presence) presence();
+      if (cleanupPresence) cleanupPresence();
+      delete window.calendarUnsubscribers[calendarId];
+      console.log(`Cleaned up listeners for calendar: ${calendarId}`);
+    }
   }
   
   /**
@@ -296,15 +504,54 @@ function initCalendarModal() {
   
   async function openModal() {
     modal.style.display = "flex";
-    updateMonthDisplay();
     
-    // Initialize calendar if not already done
-    if (!currentCalendarId) {
+    // Check if URL has changed and we need to switch calendars
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCalendarId = urlParams.get("calendar");
+    
+    if (urlCalendarId !== currentCalendarId) {
+      console.log(`URL calendar ID changed from ${currentCalendarId} to ${urlCalendarId}`);
+      // Re-initialize calendar with new ID
+      await initializeCalendar();
+    } else if (!currentCalendarId) {
+      // Initialize calendar if not already done
       await initializeCalendar();
     }
     
+    updateMonthDisplay();
     generateCalendarGrid();
   }
+  
+  /**
+   * Handle URL changes (browser back/forward, manual navigation)
+   */
+  function handleUrlChange() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCalendarId = urlParams.get("calendar");
+    
+    if (urlCalendarId && urlCalendarId !== currentCalendarId) {
+      console.log(`URL changed to calendar: ${urlCalendarId}`);
+      // If modal is open, re-initialize with new calendar
+      if (modal.style.display === 'flex') {
+        initializeCalendar().then(() => {
+          updateMonthDisplay();
+          generateCalendarGrid();
+        });
+      }
+    }
+  }
+  
+  // Listen for browser back/forward navigation
+  window.addEventListener('popstate', handleUrlChange);
+  
+  // Listen for manual URL changes (for single-page app behavior)
+  let currentUrl = window.location.href;
+  setInterval(() => {
+    if (window.location.href !== currentUrl) {
+      currentUrl = window.location.href;
+      handleUrlChange();
+    }
+  }, 100);
   
   function closeModal() {
     modal.style.display = "none";
