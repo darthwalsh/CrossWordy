@@ -7,6 +7,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Initialize calendar database after db is available
+if (typeof CalendarDB !== 'undefined') {
+  calendarDB = new CalendarDB();
+}
+
 function $(id) {
   return document.getElementById(id);
 }
@@ -556,6 +561,24 @@ let cluesHidden = false;
 
 let startTime = -1;
 let oldData = {};
+let currentPuzzleMetadata = null; // Store calendar info: {calendarId, calendarDate}
+
+/**
+ * Update calendar status when puzzle is completed
+ * @param {string} calendarId - The calendar document ID
+ * @param {string} calendarDate - The date in YYYY-MM-DD format
+ */
+async function updateCalendarOnCompletion(calendarId, calendarDate) {
+  try {
+    console.log(`Auto-updating calendar ${calendarId} for date ${calendarDate} to completed`);
+    const dateObj = new Date(calendarDate);
+    await calendarDB.updateDateStatus(calendarId, dateObj, 'completed', databaseId);
+    console.log('Calendar status updated successfully');
+  } catch (error) {
+    console.error('Failed to update calendar on completion:', error);
+  }
+}
+
 function updateChars(snapshot) {
   const data = snapshot.data();
 
@@ -566,7 +589,9 @@ function updateChars(snapshot) {
   }
 
   const filled = Object.values(data).filter(s => s).length;
-  if (filled == cellInputCount) {
+  const isCompleted = filled == cellInputCount;
+  
+  if (isCompleted) {
     const diff = (Date.now() - startTime) / 1000;
     const min = Math.floor(diff / 60);
     const sec = Math.round(diff - 60 * min);
@@ -576,6 +601,10 @@ function updateChars(snapshot) {
     time.style.display = "initial";
 
     if (solution) $("sol-check").style.display = "initial";
+    
+    if (currentPuzzleMetadata) {
+      updateCalendarOnCompletion(currentPuzzleMetadata.calendarId, currentPuzzleMetadata.calendarDate);
+    }
   } else {
     time.style.display = "none";
   }
@@ -627,10 +656,19 @@ function parseClues(s) {
 }
 
 async function play() {
+  // Hide NYT button in play mode since calendar is only for creating/importing
+  $("nyt-button").style.display = "none";
+  
   puzzleDoc = db.collection("puzzles").doc(databaseId);
   const dataReq = await puzzleDoc.get();
   const data = dataReq.data();
-  const {darkString, across = "", down = "", title = "", solution: sol = ""} = data;
+  const {darkString, across = "", down = "", title = "", solution: sol = "", calendarId, calendarDate} = data;
+  
+  if (calendarId && calendarDate) {
+    currentPuzzleMetadata = { calendarId, calendarDate };
+  } else {
+    currentPuzzleMetadata = null;
+  }
   const darkStringRows = darkString.trim().split("_");
   darks = darkStringRows.map(row => row.split("").map(c => c == "@"));
   circles = darkStringRows.map(row => row.split("").map(c => c == "O"));
@@ -795,8 +833,12 @@ async function publishPuzzle() {
   const solutionText = solution ? solution.map(row => row.join("\t")).join("\n") : "";
 
   const creation = firebase.firestore.Timestamp.now();
-
-  const ref = await db.collection("puzzles").add({
+  
+  // Check for pending calendar data from date selection
+  const pendingCalendarId = sessionStorage.getItem('pendingCalendarId');
+  const pendingCalendarDate = sessionStorage.getItem('pendingCalendarDate');
+  
+  const puzzleData = {
     darkString,
     across,
     down,
@@ -804,10 +846,31 @@ async function publishPuzzle() {
     crossWordyCreationMS,
     solution: solutionText,
     creation,
-  });
+  };
+  
+  if (pendingCalendarId && pendingCalendarDate) {
+    puzzleData.calendarId = pendingCalendarId;
+    puzzleData.calendarDate = pendingCalendarDate;
+    console.log(`Creating puzzle with calendar metadata: ${pendingCalendarId}, ${pendingCalendarDate}`);
+  }
+
+  const ref = await db.collection("puzzles").add(puzzleData);
 
   await ref.collection("live").doc("shares").set({});
   await ref.collection("live").doc("cells").set({});
+  
+  if (pendingCalendarId && pendingCalendarDate) {
+    try {
+      const dateObj = new Date(pendingCalendarDate);
+      await calendarDB.updateDateStatus(pendingCalendarId, dateObj, 'in-progress', ref.id);
+      console.log(`Updated calendar ${pendingCalendarId} with puzzle ${ref.id} for date ${pendingCalendarDate}`);
+      
+      sessionStorage.removeItem('pendingCalendarId');
+      sessionStorage.removeItem('pendingCalendarDate');
+    } catch (error) {
+      console.error('Failed to update calendar with new puzzle:', error);
+    }
+  }
 
   window.location = `?id=${ref.id}`;
 }
@@ -978,6 +1041,8 @@ if (databaseId) {
   play();
 } else {
   createPuzzle();
+  // Initialize calendar modal only in create mode
+  initCalendarModal();
 }
 
 // TODO add deletion mechanism using puzzles/ID/crossWordyCreationMS, where default crossWordyCreationMS is 2023-03-20 -- maybe using TTL mechanism? https://cloud.google.com/firestore/docs/ttl?hl=en
